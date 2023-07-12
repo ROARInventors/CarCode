@@ -1,5 +1,3 @@
 # Robot Open Autonomous Racing (ROAR)
 
-This is the entry for the ROAR Spring 2023 competition that won 1st place!
-
-Technical Report: coming soon!
+This is the ROAR-Inventors' contribution to the ROAR competition, forked from the Sprint 2023 winners.
