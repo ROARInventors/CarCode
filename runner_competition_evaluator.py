@@ -12,7 +12,6 @@ from ROAR.agent_module.michael_pid_agent import PIDAgent
 from ROAR.agent_module.pid_fast_agent import PIDFastAgent
 
 
-
 def compute_score(carla_runner: CarlaRunner) -> Tuple[float, int, int]:
     """
     Calculates the score of the vehicle upon completion of the track based on certain metrics
