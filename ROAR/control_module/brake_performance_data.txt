@@ -1,3 +1,6 @@
+
+number of time-intervals fromm brake start, s= current_speed, d= distance from brake_start
+
 Break test: 0 s= 100.3 d= 0.0
 Break test: 5 s= 82.8 d= 6.5
 Break test: 10 s= 59.2 d= 11.4
@@ -41,3 +44,67 @@ Break test: 45 s= 39.4 d= 92.1
 Break test: 50 s= 15.5 d= 94.0
 
 ---------------------
+
+
+MAP 0Transform(Location(x=2542.800049, y=4069.599854, z=111.500000), Rotation(pitch=0.000000, yaw=169.999756, roll=0.000000))
+MAP 1Transform(Location(x=1350.799927, y=4260.100098, z=62.000000), Rotation(pitch=-1.538753, yaw=169.996048, roll=0.271400))
+MAP 2Transform(Location(x=1328.299927, y=3553.099854, z=68.900002), Rotation(pitch=0.000000, yaw=0.000000, roll=0.000000))
+MAP 3Transform(Location(x=2421.800049, y=3741.599854, z=115.500000), Rotation(pitch=0.000000, yaw=-47.812477, roll=0.000000))
+MAP 4Transform(Location(x=3592.799805, y=3660.099854, z=192.800003), Rotation(pitch=0.000000, yaw=-67.500038, roll=0.000000))
+MAP 5Transform(Location(x=3043.300049, y=2867.099854, z=345.500000), Rotation(pitch=0.000000, yaw=-157.499939, roll=0.000000))
+MAP 6Transform(Location(x=3527.799805, y=2609.099854, z=417.299988), Rotation(pitch=0.000000, yaw=-19.687559, roll=0.000000))
+MAP 7Transform(Location(x=4836.299805, y=2955.599854, z=505.099976), Rotation(pitch=0.000000, yaw=0.000130, roll=0.000000))
+MAP 8Transform(Location(x=5272.299805, y=3083.599854, z=500.299988), Rotation(pitch=0.000000, yaw=61.875092, roll=0.000000))
+MAP 9Transform(Location(x=5614.799805, y=4085.599854, z=422.799988), Rotation(pitch=0.000000, yaw=45.000019, roll=0.000000))
+MAP 10Transform(Location(x=3695.799805, y=4926.100098, z=145.899994), Rotation(pitch=0.000000, yaw=154.687546, roll=0.000000))
+MAP 11Transform(Location(x=3090.300049, y=4852.600098, z=116.199997), Rotation(pitch=0.000000, yaw=-174.374893, roll=0.000000))
+MAP 12Transform(Location(x=2596.300049, y=4359.100098, z=103.599998), Rotation(pitch=0.000000, yaw=-101.250046, roll=0.000000))
+
+
+
+===================== CURRENT SOLUTION ================
+INFO - 2023-08-01 14:48:37,078 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1083 section: 1083
+Finished section 1 total: 3217 section: 2134
+Finished section 2 total: 6177 section: 2960
+Finished section 3 total: 9484 section: 3307
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          516.6000076979399           |       0        |       1        |
+| AVG for 1 trials = 516.6000076979399 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+
+===================== Aug1, with special decelaration formula to account for drag.
+and only 1 special braking waypoint 5012.
+
+Finished section 0 steps: 1146
+Finished section 1 steps: 2327
+Finished section 2 steps: 3252
+Finished section 3 steps: 3568
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          559.2000083327293           |       0        |       1        |
+| AVG for 1 trials = 559.2000083327293 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+
+===================== Aug1, deceleration with drag, + coasting + dt=0.05.
+and only 1 special braking waypoint 5012.
+INFO - 2023-08-01 21:36:24,177 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+
+Finished section 0 total: 1136 section: 1136
+Finished section 1 total: 3418 section: 2282
+Finished section 2 total: 6584 section: 3166
+Finished section 3 total: 10096 section: 3512
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          549.8000081926584           |       0        |       1        |
+| AVG for 1 trials = 549.8000081926584 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
