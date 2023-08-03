@@ -204,3 +204,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
             far_dist = curr_wp.location.distance(far_wp.location)
             print("Dist " + str(round(next_dist, 2)) + " " + str(round(close_dist)) + " " + str(round(far_dist)))
 
+    def __del__(self):
+        # in case of crash print where.
+        if len(self.way_points_queue) > 0:
+            print("\nNext waypoint is: " + str(self.way_points_queue[0]))
