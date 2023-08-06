@@ -15,6 +15,7 @@ from ROAR.utilities_module.errors import (
 from ROAR.agent_module.agent import Agent
 import json
 from pathlib import Path
+from statistics import mean
 
 
 class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
@@ -41,13 +42,13 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                          behavior_planner=behavior_planner,
                          )
         self.logger = logging.getLogger("SimplePathFollowingLocalPlanner")
+        self.timing_section_index = [3000, 10000, 20000, 30000, 32000]
+        self.timing_section_waypoints = []
         self.set_mission_plan()
         self.logger.debug("Simple Path Following Local Planner Initiated")
         self.closeness_threshold = closeness_threshold
         self.closeness_threshold_config = json.load(Path(
             agent.agent_settings.simple_waypoint_local_planner_config_file_path).open(mode='r'))
-        self.timing_section_index = [3000, 10000, 20000, 30000, 32000]
-        self.timing_section_waypoints = []
         self.previous_num_steps = 0
 
     def set_mission_plan(self) -> None:
@@ -64,6 +65,13 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                 self.mission_planner.mission_plan
         ):  # this actually clears the mission plan!!
             self.way_points_queue.append(self.mission_planner.mission_plan.popleft())
+
+        # self.way_points_queue = self.get_smoother_waypoints()
+        
+        if len(self.timing_section_waypoints) == 0: 
+            for i in self.timing_section_index:
+                if i < len(self.way_points_queue):
+                    self.timing_section_waypoints.append(self.way_points_queue[i])
 
         # set waypoint queue to current spawn location
         # 1. find closest waypoint
@@ -111,9 +119,9 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         ):
             return VehicleControl()
 
-        if len(self.timing_section_waypoints) == 0: 
-            for i in self.timing_section_index:
-                self.timing_section_waypoints.append(self.way_points_queue[i])
+        # if len(self.timing_section_waypoints) == 0: 
+        #     for i in self.timing_section_index:
+        #         self.timing_section_waypoints.append(self.way_points_queue[i])
 
         # get vehicle's location
         vehicle_transform: Union[Transform, None] = self.agent.vehicle.transform
@@ -144,6 +152,8 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                 break
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         target_waypoint = self.way_points_queue[0]
+        # if current_speed > 10:
+        # target_waypoint = self.get_next_waypoint(current_speed)
         # if keyboard.is_pressed("t"):
         #     print(target_waypoint.record())
         #     print(self.agent.vehicle.transform.location)
@@ -155,7 +165,8 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         waypoint_lookahead = round(pow(current_speed, 2)*0.002 + 0.7*current_speed)
         far_waypoint = self.way_points_queue[waypoint_lookahead]
         close_waypoint = self.way_points_queue[min(120, waypoint_lookahead)]
-        more_waypoints = list(itertools.islice(self.way_points_queue, 0, 1000))
+        more_waypoints = self.get_smoother_waypoints()
+        # more_waypoints = list(itertools.islice(self.way_points_queue, 0, 1000))
         # self.print_distances(target_waypoint, close_waypoint, far_waypoint)
         # more_waypoints = list(itertools.islice(self.way_points_queue, 0, waypoint_lookahead+1))
         # print("\n\nART: waypoint_lookahead= " + str(waypoint_lookahead) + " wayp= " + str(len(self.way_points_queue)))
@@ -169,6 +180,55 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         #                   f"Target Location: {target_waypoint.location}\n"
         #                   f"Control: {control} | Speed: {Vehicle.get_speed(self.agent.vehicle)}\n")
         return control
+
+    def get_next_waypoint(self, current_speed):
+        # dist_in_next_tick = current_speed * 3.6 * 0.05
+        # dist = 0
+        # for p in self.way_points_queue:
+        points = list(itertools.islice(self.way_points_queue, 0, 2))
+        new_point = Transform.from_array(
+            [mean([p.location.x for p in points]),
+             mean([p.location.y for p in points]),
+             mean([p.location.z for p in points]),
+             points[0].rotation.pitch, points[0].rotation.yaw, points[0].rotation.roll])
+        return new_point
+    
+    def get_smoother_waypoints(self):
+        new_points = []
+        # new_points = [self.way_points_queue[0]]
+        # for i in range(len(self.way_points_queue) - 2):
+        for i in range(min(500, len(self.way_points_queue)-2)):
+            p1 = self.way_points_queue[i]
+            p2 = self.way_points_queue[i+1]
+            new_p = Transform.from_array([
+                mean([p1.location.x, p2.location.x]),
+                mean([p1.location.y, p2.location.y]),
+                mean([p1.location.z, p2.location.z]),
+                mean([p1.rotation.pitch, p2.rotation.pitch]),
+                mean([p1.rotation.yaw, p2.rotation.yaw]),
+                mean([p1.rotation.roll, p2.rotation.roll]),
+            ])
+            new_points.append(new_p)
+        # new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
+        return new_points
+
+    def get_smoother_waypoints_all(self):
+        new_points = [self.way_points_queue[0]]
+        for i in range(len(self.way_points_queue) - 2):
+            p1 = self.way_points_queue[i]
+            p2 = self.way_points_queue[i+1]
+            new_p = Transform.from_array([
+                mean([p1.location.x, p2.location.x]),
+                mean([p1.location.y, p2.location.y]),
+                mean([p1.location.z, p2.location.z]),
+                mean([p1.rotation.pitch, p2.rotation.pitch]),
+                mean([p1.rotation.yaw, p2.rotation.yaw]),
+                mean([p1.rotation.roll, p2.rotation.roll]),
+            ])
+            new_points.append(new_p)
+        new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
+        return new_points
+
 
     def set_closeness_threhold(self, config: dict):
         curr_speed = Vehicle.get_speed(self.agent.vehicle)
