@@ -3,15 +3,12 @@ import numpy as np
 from ROAR_Sim.configurations.configuration import Configuration as CarlaConfig
 from ROAR.configurations.configuration import Configuration as AgentConfig
 from pathlib import Path
-from ROAR.agent_module.pure_pursuit_agent \
-    import PurePursuitAgent
+from ROAR.agent_module.pure_pursuit_agent import PurePursuitAgent
 from ROAR_Sim.carla_client.carla_runner import CarlaRunner
 from typing import Tuple
 from prettytable import PrettyTable
 from ROAR.agent_module.michael_pid_agent import PIDAgent
-from ROAR.agent_module.pid_fast_agent import PIDFastAgent
-
-
+from ROAR.agent_module.pid_curve_agent import PIDCurveAgent
 
 def compute_score(carla_runner: CarlaRunner) -> Tuple[float, int, int]:
     """
@@ -81,7 +78,7 @@ def suppress_warnings():
 
 def main():
     suppress_warnings()
-    agent_class = PIDFastAgent
+    agent_class = PIDCurveAgent
     num_trials = 1
     total_score_array = []
     num_laps = 1

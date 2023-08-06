@@ -6,6 +6,7 @@ from ROAR.planning_module.mission_planner.mission_planner import MissionPlanner
 from ROAR.planning_module.behavior_planner.behavior_planner import BehaviorPlanner
 # import keyboard
 
+import itertools
 import logging
 from typing import Union
 from ROAR.utilities_module.errors import (
@@ -142,8 +143,14 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         waypoint_lookahead = round(pow(current_speed, 2)*0.002 + 0.7*current_speed)
         far_waypoint = self.way_points_queue[waypoint_lookahead]
         close_waypoint = self.way_points_queue[min(120, waypoint_lookahead)]
+        more_waypoints = list(itertools.islice(self.way_points_queue, 0, 800))
+        # more_waypoints = list(itertools.islice(self.way_points_queue, 0, waypoint_lookahead+1))
+        # print("\n\nART: waypoint_lookahead= " + str(waypoint_lookahead) + " wayp= " + str(len(self.way_points_queue)))
+        # self.logger.debug("\n\nART: waypoint_lookahead=", waypoint_lookahead)
         
-        control: VehicleControl = self.controller.run_in_series(next_waypoint=target_waypoint, close_waypoint=close_waypoint, far_waypoint=far_waypoint)
+        control: VehicleControl = self.controller.run_in_series(
+            next_waypoint=target_waypoint, close_waypoint=close_waypoint, far_waypoint=far_waypoint, more_waypoints=more_waypoints)
+        
         # self.logger.debug(f"\n"
         #                   f"Curr Transform: {self.agent.vehicle.transform}\n"
         #                   f"Target Location: {target_waypoint.location}\n"
