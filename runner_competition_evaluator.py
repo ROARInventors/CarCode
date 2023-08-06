@@ -9,6 +9,8 @@ from typing import Tuple
 from prettytable import PrettyTable
 from ROAR.agent_module.michael_pid_agent import PIDAgent
 from ROAR.agent_module.pid_curve_agent import PIDCurveAgent
+from ROAR.agent_module.pid_fast_agent import PIDFastAgent
+
 
 def compute_score(carla_runner: CarlaRunner) -> Tuple[float, int, int]:
     """
@@ -78,7 +80,7 @@ def suppress_warnings():
 
 def main():
     suppress_warnings()
-    agent_class = PIDCurveAgent
+    agent_class = PIDFastAgent
     num_trials = 1
     total_score_array = []
     num_laps = 1
