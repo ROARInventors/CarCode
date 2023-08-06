@@ -97,8 +97,11 @@ class PIDFastController(Controller):
         
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         # limit amount of steering change allowed at high speed. TODO: this could be a function of speed.
-        if current_speed > 220:
-            max_steering_change = 0.0004
+        if current_speed > 240:
+            max_steering_change = 0.00038
+            new_steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
+            if new_steering != steering:
+                print(" CLIPPED: " + str(steering) + " to " + str(new_steering))
             steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
         
         # get errors from lat pid
@@ -232,17 +235,14 @@ class PIDFastController(Controller):
         target_speed1 = self._get_target_speed(r1, pitch_to_next_point)
         target_speed2 = self._get_target_speed(r2, pitch_to_next_point)
         target_speed3 = self._get_target_speed(r3, pitch_to_next_point)
-        # target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
 
         close_distance = self.target_distance[self.close_index] + 3
         mid_distance = self.target_distance[self.mid_index]
         far_distance = self.target_distance[self.far_index]
-        far_distance_2 = self.target_distance[self.far_index+1]
         speed_data = []
         speed_data.append(self._speed_for_turn(close_distance, target_speed1, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(mid_distance, target_speed2, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(far_distance, target_speed3, pitch_to_next_point))
-        # speed_data.append(self._speed_for_turn(far_distance_2, target_speed4, pitch_to_next_point))
 
         # update = speed_data[0]
         update = self._select_speed(speed_data)
@@ -333,7 +333,7 @@ class PIDFastController(Controller):
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: initiate counter" + str(self.brake_ticks))
                     return -1, 1
                 else:
-                    # speed is already dropping fast, ok to accelerate
+                    # speed is already dropping fast, ok to throttle because the effect is delayed
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: throttle early: sp_ch=" + str(percent_speed_change))
                     return 1, 0
             else:
@@ -389,6 +389,8 @@ class PIDFastController(Controller):
         if pitch_to_next_point < math.radians(-8):
             throttle *= 0.93
         if pitch_to_next_point < math.radians(-10):
+            throttle *= 0.92
+        if pitch_to_next_point < math.radians(-11):
             throttle *= 0.92
 
         if pitch_to_next_point > math.radians(2):
@@ -494,7 +496,7 @@ class PIDFastController(Controller):
     def _get_target_speed(self, radius, pitch=0.0):
         if radius >= self.max_radius:
             return self.max_speed
-        mu = 0.8
+        mu = 1.0
         # mu = 0.75  # try this
         target_speed = math.sqrt(mu*9.81*radius) * 3.6
         if abs(pitch) > math.radians(1.5):
