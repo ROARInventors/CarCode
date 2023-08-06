@@ -68,12 +68,13 @@ class PIDFastController(Controller):
         pitch = float(next_waypoint.record().split(",")[4])
 
         if self.region == 1:
-            if sharp_error < 0.68 or current_speed <= 90:
+            #print(self.agent.vehicle.transform.location)
+            if sharp_error < 0.68 or current_speed <= 100:
                 throttle = 1
                 brake = 0
             else:
                 throttle = -1
-                brake = 1
+                brake = 0.3
         elif self.region == 2:
             waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
             dist = self.agent.vehicle.transform.location.distance(waypoint.location)
@@ -109,7 +110,8 @@ class PIDFastController(Controller):
         
         # if keyboard.is_pressed("space"):
         #      print(self.agent.vehicle.transform.record())
-        
+        #print("T:", throttle, "G:", gear, "B:", brake, "S:", steering)
+        #print(self.region)
         return VehicleControl(throttle=throttle, steering=steering, brake=brake, gear=gear)
 
     @staticmethod
