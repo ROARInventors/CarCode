@@ -129,7 +129,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
             raise AgentException("I do not know where I am, I cannot proceed forward")
 
         # redefine closeness level based on speed
-        self.set_closeness_threhold(self.closeness_threshold_config)
+        self.set_closeness_threshold(self.closeness_threshold_config)
 
         # get current waypoint
         curr_closest_dist = float("inf")
@@ -152,8 +152,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                 break
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         target_waypoint = self.way_points_queue[0]
-        # if current_speed > 10:
-        # target_waypoint = self.get_next_waypoint(current_speed)
+
         # if keyboard.is_pressed("t"):
         #     print(target_waypoint.record())
         #     print(self.agent.vehicle.transform.location)
@@ -165,12 +164,8 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         waypoint_lookahead = round(pow(current_speed, 2)*0.002 + 0.7*current_speed)
         far_waypoint = self.way_points_queue[waypoint_lookahead]
         close_waypoint = self.way_points_queue[min(120, waypoint_lookahead)]
-        #more_waypoints = self.get_smoother_waypoints()
         more_waypoints = list(itertools.islice(self.way_points_queue, 0, 1000))
         # self.print_distances(target_waypoint, close_waypoint, far_waypoint)
-        # more_waypoints = list(itertools.islice(self.way_points_queue, 0, waypoint_lookahead+1))
-        # print("\n\nART: waypoint_lookahead= " + str(waypoint_lookahead) + " wayp= " + str(len(self.way_points_queue)))
-        # self.logger.debug("\n\nART: waypoint_lookahead=", waypoint_lookahead)
         
         control: VehicleControl = self.controller.run_in_series(
             next_waypoint=target_waypoint, close_waypoint=close_waypoint, far_waypoint=far_waypoint, more_waypoints=more_waypoints)
@@ -181,56 +176,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         #                   f"Control: {control} | Speed: {Vehicle.get_speed(self.agent.vehicle)}\n")
         return control
 
-    def get_next_waypoint(self, current_speed):
-        # dist_in_next_tick = current_speed * 3.6 * 0.05
-        # dist = 0
-        # for p in self.way_points_queue:
-        points = list(itertools.islice(self.way_points_queue, 0, 2))
-        new_point = Transform.from_array(
-            [mean([p.location.x for p in points]),
-             mean([p.location.y for p in points]),
-             mean([p.location.z for p in points]),
-             points[0].rotation.pitch, points[0].rotation.yaw, points[0].rotation.roll])
-        return new_point
-    
-    def get_smoother_waypoints(self):
-        new_points = []
-        # new_points = [self.way_points_queue[0]]
-        # for i in range(len(self.way_points_queue) - 2):
-        for i in range(min(500, len(self.way_points_queue)-2)):
-            p1 = self.way_points_queue[i]
-            p2 = self.way_points_queue[i+1]
-            new_p = Transform.from_array([
-                mean([p1.location.x, p2.location.x]),
-                mean([p1.location.y, p2.location.y]),
-                mean([p1.location.z, p2.location.z]),
-                mean([p1.rotation.pitch, p2.rotation.pitch]),
-                mean([p1.rotation.yaw, p2.rotation.yaw]),
-                mean([p1.rotation.roll, p2.rotation.roll]),
-            ])
-            new_points.append(new_p)
-        # new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
-        return new_points
-
-    # def get_smoother_waypoints_all(self):
-    #     new_points = [self.way_points_queue[0]]
-    #     for i in range(len(self.way_points_queue) - 2):
-    #         p1 = self.way_points_queue[i]
-    #         p2 = self.way_points_queue[i+1]
-    #         new_p = Transform.from_array([
-    #             mean([p1.location.x, p2.location.x]),
-    #             mean([p1.location.y, p2.location.y]),
-    #             mean([p1.location.z, p2.location.z]),
-    #             mean([p1.rotation.pitch, p2.rotation.pitch]),
-    #             mean([p1.rotation.yaw, p2.rotation.yaw]),
-    #             mean([p1.rotation.roll, p2.rotation.roll]),
-    #         ])
-    #         new_points.append(new_p)
-    #     new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
-    #     return new_points
-
-
-    def set_closeness_threhold(self, config: dict):
+    def set_closeness_threshold(self, config: dict):
         curr_speed = Vehicle.get_speed(self.agent.vehicle)
         for speed_upper_bound, closeness_threshold in config.items():
             speed_upper_bound = float(speed_upper_bound)

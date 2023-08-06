@@ -27,8 +27,9 @@ class SpeedData:
         self.speed_diff = current_speed - recommended_speed
 
 class PIDFastController(Controller):
-    debug_strings = deque(maxlen=1000)
+    # save debug messages to show after crash or finish.
     display_debug = False
+    debug_strings = deque(maxlen=1000)
 
     def __init__(self, agent, steering_boundary: Tuple[float, float],
                  throttle_boundary: Tuple[float, float], **kwargs):
@@ -38,24 +39,19 @@ class PIDFastController(Controller):
         throttle_boundary = throttle_boundary
         self.steering_boundary = steering_boundary
         self.config = json.load(Path(agent.agent_settings.pid_config_file_path).open(mode='r'))
-        # self.target_distance = [0, 50, 100, 150, 200, 250]  # 1 slower than 2
-        self.intended_target_distance = [0, 30, 60, 90, 120, 150]  # 2 good 
-        self.target_distance = [0, 30, 60, 90, 120, 150]  # 2 good 
-        # self.target_distance = [0, 20, 40, 70, 100, 150]  # 3 slower than 2
-        # self.target_distance = [0, 20, 40, 60, 80, 100]  # 4 slower than 2
+        self.intended_target_distance = [0, 30, 60, 90, 120, 150] 
+        self.target_distance = [0, 30, 60, 90, 120, 150]
         self.close_index = 0
         self.mid_index = 1
         self.far_index = 2
         self.tick_counter = 0
-        self.previous_throttle_brake = (1, 0)
-        self.previous_steering = 0.5
         self.previous_speed = 1.0
         self.brake_counter = 0
         self.forced_brake_counter = 0
         self.brake_ticks = 0
-
-
         self.region = 1
+
+        # for testing how fast the car stops
         self.brake_test_counter = 0
         self.brake_test_in_progress = False
 
@@ -76,7 +72,7 @@ class PIDFastController(Controller):
         self.lat_pid_controller = LatPIDController(
             agent=agent,
             config=self.config["latitudinal_controller"],
-            dt=0.05, # not sure if this is good?
+            dt=0.05,
             steering_boundary=steering_boundary
         )
         self.logger = logging.getLogger(__name__)
@@ -88,21 +84,15 @@ class PIDFastController(Controller):
     # modified
     def run_in_series(self, 
                       next_waypoint: Transform, 
-                      close_waypoint: Transform, 
-                      far_waypoint: Transform, 
+                      close_waypoint: Transform,  # ok to remove 
+                      far_waypoint: Transform,    # ok to remove
                       more_waypoints: [Transform], **kwargs) -> VehicleControl:
 
         # run lat pid controller
+        # NOTE: ok to remove wide_error and sharp_error
         steering, error, wide_error, sharp_error = self.lat_pid_controller.run_in_series(next_waypoint=next_waypoint, close_waypoint=close_waypoint, far_waypoint=far_waypoint)
         
         current_speed = Vehicle.get_speed(self.agent.vehicle)
-        # limit amount of steering change allowed at high speed. TODO: this could be a function of speed.
-        # if current_speed > 240:
-        #     max_steering_change = 0.00038
-        #     new_steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
-        #     if new_steering != steering:
-        #         print(" CLIPPED: " + str(steering) + " to " + str(new_steering))
-        #     steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
         
         # get errors from lat pid
         error = abs(round(error, 3))
@@ -114,52 +104,22 @@ class PIDFastController(Controller):
         pitch = float(next_waypoint.record().split(",")[4])
 
         self.tick_counter += 1
-        if self.region == 1:
+        waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
+        dist = self.agent.vehicle.transform.location.distance(waypoint.location)
+        break_for_counts = self._get_forced_brake_counter_for_waypoint(waypoint)
+        if dist <= 5 and break_for_counts > 0:
+            self.forced_brake_counter = break_for_counts - 1
+            throttle = -1
+            brake = 0.8
+            print("\nspecial break point: ")
+            print(self.waypoint_queue_braking[0])
+            self.waypoint_queue_braking.pop(0)
+        elif self.forced_brake_counter > 0:
+            throttle = -1
+            brake = 1
+            self.forced_brake_counter -= 1
+        else:
             throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
-            # if sharp_error < 0.68 or current_speed <= 90:
-            #     throttle = 1
-            #     brake = 0
-            # else:
-            #     throttle = -1
-            #     brake = 1
-        elif self.region == 2:
-            waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
-            dist = self.agent.vehicle.transform.location.distance(waypoint.location)
-            break_for_counts = self._get_forced_brake_counter_for_waypoint(waypoint)
-            if dist <= 5 and break_for_counts > 0:
-                self.forced_brake_counter = break_for_counts - 1
-                throttle = -1
-                brake = 0.8
-                print("\nspecial break point: ")
-                print(self.waypoint_queue_braking[0])
-                self.waypoint_queue_braking.pop(0)
-            elif self.forced_brake_counter > 0:
-                throttle = -1
-                brake = 1
-                self.forced_brake_counter -= 1
-            else:
-                throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
-
-
-            # waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
-            # dist = self.agent.vehicle.transform.location.distance(waypoint.location)
-            # self.forced_brake_counter = 2
-            # if self.brake_counter > 0:
-            #     throttle = -1
-            #     brake = 1
-            #     self.brake_counter += 1
-            #     if self.brake_counter >= 3:
-            #         self.brake_counter = 0
-            # elif dist <= 5:
-            #     self.brake_counter = 1
-            #     throttle = -1
-            #     brake = 0.7
-            #     print("\nspecial break point: ")
-            #     print(self.waypoint_queue_braking[0])
-            #     self.waypoint_queue_braking.pop(0)
-            # else:
-            #     throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
-
 
         # gear = 1        
         gear = max(1, (int)((current_speed - 2*pitch) / 60))
@@ -167,27 +127,25 @@ class PIDFastController(Controller):
             gear = -1
         
         waypoint = self.waypoint_queue_region[0]
+        ## region related stuff is ok to remove
         dist = self.agent.vehicle.transform.location.distance(waypoint.location)
         if dist <= 10:
             self.region += 1
             self.waypoint_queue_region.pop(0)
 
         #throttle, brake = self._brake_test(throttle, brake)
+        
         # if keyboard.is_pressed("space"):
         #      print(self.agent.vehicle.transform.record())
 
         self.dprint("--- " + str(throttle) + " " + str(brake) 
-                    + " steer " + str(steering) + " p_steer " + str(self.previous_steering)
-                    + " ch " + str(steering - self.previous_steering) 
+                    + " steer " + str(steering)
                     + "     loc x,z" + str(self.agent.vehicle.transform.location.x)
                     + " " + str(self.agent.vehicle.transform.location.z)) 
 
-        self.previous_throttle_brake = (throttle, brake)
-        self.previous_steering = steering
         self.previous_speed = current_speed
         if self.brake_ticks > 0 and brake > 0:
             self.brake_ticks -= 1
-
 
         return VehicleControl(throttle=throttle, steering=steering, brake=brake, gear=gear)
 
@@ -195,7 +153,7 @@ class PIDFastController(Controller):
         waypoint_x = int(waypoint.location.x)
         if  waypoint_x == 4441: # needs 3
             return 3
-        if waypoint_x == 4203:
+        if waypoint_x == 4203: # 1 is enough
             return 1
         if waypoint_x == 5012:  # probably needs 3
             return 3
@@ -212,30 +170,16 @@ class PIDFastController(Controller):
         r1 = self._get_radius(wp[self.close_index : self.close_index + 3])
         r2 = self._get_radius(wp[self.mid_index : self.mid_index + 3])
         r3 = self._get_radius(wp[self.far_index : self.far_index + 3])
-        r4 = self._get_radius([wp[0], wp[2], wp[4]])
 
-        # pitch_to_next_point = \
-        #     math.asin( (wp[2].location.y - wp[0].location.y) / wp[0].location.distance(wp[2].location))
         p1 = \
             math.asin( np.clip((wp[1].location.y - wp[0].location.y) / (self.target_distance[1] - self.target_distance[0]), -0.5, 0.5))
         p2 = \
             math.asin( np.clip((wp[2].location.y - wp[0].location.y) / (self.target_distance[2] - self.target_distance[0]), -0.5, 0.5))
         pitch_to_next_point = min(p1, p2)
 
-        self.dprint("p3= " + str(wp[2]))
-
-        # pitch_to_next_point = \
-        #     math.asin( np.clip((wp[2].location.y - wp[0].location.y) / (self.target_distance[2] - self.target_distance[0]), -0.5, 0.5))
-        # self.dprint("--- n " + str(wp[2].location.y - wp[0].location.y) + " d " 
-        #             + str(self.target_distance[2] - self.target_distance[0])
-        #             + " pitch " + str(pitch_to_next_point) + " p_deg " + str(math.degrees(pitch_to_next_point)))
-        # self.dprint(str((wp[2].location.y - wp[0].location.y) / (self.target_distance[2] - self.target_distance[0])))
-        # self.dprint(str(math.asin( np.clip((wp[2].location.y - wp[0].location.y) / (self.target_distance[2] - self.target_distance[0]), -1, 1))))
-
         target_speed1 = self._get_target_speed(r1, pitch_to_next_point)
         target_speed2 = self._get_target_speed(r2, pitch_to_next_point)
         target_speed3 = self._get_target_speed(r3, pitch_to_next_point)
-        target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
 
         close_distance = self.target_distance[self.close_index] + 3
         mid_distance = self.target_distance[self.mid_index]
@@ -245,25 +189,13 @@ class PIDFastController(Controller):
         speed_data.append(self._speed_for_turn(mid_distance, target_speed2, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(far_distance, target_speed3, pitch_to_next_point))
         if current_speed > 220:
+            r4 = self._get_radius([wp[0], wp[2], wp[4]])
+            target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
             speed_data.append(self._speed_for_turn(close_distance, target_speed4, pitch_to_next_point))
 
-        # update = speed_data[0]
         update = self._select_speed(speed_data)
-        # self.dprint("r1=" + str(round(r1)) + " r2=" + str(round(r2)) + " r3= " + str(round(r3)) + " ts1= " 
-        #       + str(round(target_speed1, 2)) + " ts2= " + str(round(target_speed2, 2)) + " ts3= " + str(round(target_speed3, 2)))
 
         t, b = self._speed_data_to_throttle_and_brake(update, pitch_to_next_point)
-        # if t < 1.0:
-        #     pitch = self.agent.vehicle.transform.rotation.pitch
-        #     print("\npitch= " + str(pitch))
-        #     print("\n\ngot radius " + str(r1) + " " + str(r2) 
-        #         + " tspeed1= " + str(target_speed1) 
-        #         + " tspeed2= " + str(target_speed2) 
-        #         + " tspeed3= " + str(target_speed3)
-        #         + " cspeed= " +  (str(current_speed)) 
-        #         + " t= " + str(t) + " b= " + str(b)
-        #         #   + " wp= " + str(wp)
-        #         )
         return t, b
 
     def _speed_data_to_throttle_and_brake(self, speed_data: SpeedData, pitch_to_next_point):
@@ -273,28 +205,11 @@ class PIDFastController(Controller):
                     + " ts= " + str(round(speed_data.target_speed_at_distance, 2)) 
                     + " maxs= " + str(round(speed_data.recommended_speed_now, 2)) + " pcnt= " + str(round(percent_of_max, 2)))
 
-        # TODO: adjust for pitch
         percent_change_per_tick = 0.07 # speed drop for one time-tick of braking
         speed_up_threshold = 0.99
         throttle_decrease_multiple = 0.7
         throttle_increase_multiple = 1.25
         debug_note = ""
-        # if pitch_to_next_point < math.radians(-2):
-        #     # print("changing multiples-2 " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)))
-        #     percent_change_per_tick = 0.05
-        # if pitch_to_next_point < math.radians(-3):
-            # print("changing multiples-3 " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)))
-            # percent_change_per_tick = 0.055
-            # speed_up_threshold = 0.95
-            # throttle_decrease_multiple = 0.4
-            # throttle_increase_multiple = 1.1
-        # if pitch_to_next_point < math.radians(-4):
-            # print("changing multiples-4 " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)) 
-            #       + " loc " + str(self.agent.vehicle.transform.location.x))
-            # percent_change_per_tick = 0.05
-            # speed_up_threshold = 0.94
-            # throttle_decrease_multiple = 0.3
-            # throttle_increase_multiple = 1.05
         if pitch_to_next_point < math.radians(-6):
             percent_change_per_tick = 0.05
             speed_up_threshold = 0.94
@@ -320,7 +235,9 @@ class PIDFastController(Controller):
         if debug_note != "":
             self.dprint("changing multiples- " + str(debug_note) + " " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)) 
                     + " loc " + str(self.agent.vehicle.transform.location.x))
+
         percent_speed_change = (speed_data.current_speed - self.previous_speed) / (self.previous_speed + 0.0001) # avoid division by zero
+
         if percent_of_max > 1:
             # Consider slowing down
             if percent_of_max > 1 + percent_change_per_tick:
@@ -379,14 +296,8 @@ class PIDFastController(Controller):
         # TODO: commpute throttle needed to maintain current speed with given pitch.
         #       need to consider current_speed
         throttle = 0.6 + current_speed/1000
-        # if pitch_to_next_point < math.radians(-2):
-        #     throttle *= 0.95
-        # if pitch_to_next_point < math.radians(-3):
-        #     throttle *= 0.95
         if pitch_to_next_point < math.radians(-4):
             throttle *= 0.95
-        # if pitch_to_next_point < math.radians(-5):
-        #     throttle *= 0.95
         if pitch_to_next_point < math.radians(-6):
             throttle *= 0.95
         if pitch_to_next_point < math.radians(-8):
@@ -409,14 +320,10 @@ class PIDFastController(Controller):
     def _speed_for_turn(self, distance, target_speed, pitch_to_next_point):
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         d = (1/675) * (target_speed**2) + distance
-        # TODO: figure out how to account for pitch
-        pitch_multiplier = 1 + (0.02 * round(math.degrees(pitch_to_next_point)))
-        # d = (1/675) * (target_speed**2) + distance*pitch_multiplier
         max_speed = math.sqrt(675 * d)
         return SpeedData(distance, current_speed, target_speed, max_speed)
     
     def _get_next_interesting_waypoints(self, more_waypoints: [Transform], current_speed):
-        # target_distance = [0, 30, 60, 110, 160, 210, 260]
         points = []
         dist = [] # for debugging
         start = self.agent.vehicle.transform
@@ -462,64 +369,20 @@ class PIDFastController(Controller):
         # Calculating curvature using Menger curvature formula
         radius = (len_side_1 * len_side_2 * len_side_3) / (4 * math.sqrt(area_squared))
         return radius
-        
-    def get_dip_radius(self, wp: [Transform]):
-        point1 = (wp[0].location.y, 0)
-        point2 = (wp[1].location.y, 30)
-        point3 = (wp[2].location.y, 60)
-
-        # Calculating length of all three sides
-        len_side_1 = round( math.dist(point1, point2), 3)
-        len_side_2 = round( math.dist(point2, point3), 3)
-        len_side_3 = round( math.dist(point1, point3), 3)
-        small_num = 0.01
-        if len_side_1 < small_num or len_side_2 < small_num or len_side_3 < small_num:
-            return self.max_radius
-
-        # sp is semi-perimeter
-        sp = (len_side_1 + len_side_2 + len_side_3) / 2
-
-        # Calculating area using Herons formula
-        area_squared = sp * (sp - len_side_1) * (sp - len_side_2) * (sp - len_side_3)
-        if area_squared < small_num:
-            return self.max_radius
-        # Calculating curvature using Menger curvature formula
-        radius = (len_side_1 * len_side_2 * len_side_3) / (4 * math.sqrt(area_squared))
-        if point2[0] < (point1[0]+point2[0])/2:
-            return -radius
-        return radius
-    
-    def get_flight_time(self, current_speed, angle = 5):
-        #assume 5 degree angle
-        current_speed = current_speed / 3.6
-        vertical_speed = math.sin(math.radians(angle)) * current_speed
-        time = vertical_speed/9.81*2
-        return time
 
     def _get_target_speed(self, radius, pitch=0.0):
         if radius >= self.max_radius:
             return self.max_speed
-        mu = 1.15
+        mu = 1.155
         target_speed = math.sqrt(mu*9.81*radius) * 3.6
-        if abs(pitch) > math.radians(1.5):
-            # TODO: fix me!
-            multiplier = max(0.8, min((1 + 0.5*math.tan(pitch)), 1.2))
-            # print("pitch " + str(pitch) + " ap " + str(abs(pitch)) + " pdeg " + str(math.degrees(pitch)) + " tan " + str(math.tan(pitch)) + " mult " + str(multiplier))
-            # target_speed *= multiplier
         return max(20, min(target_speed, self.max_speed))  # clamp between 20 and max_speed
 
     def print_speed(self, text, s1, s2, s3, curr_s):
         self.dprint(text + " s1= " + str(round(s1, 2)) + " s2= " + str(round(s2, 2)) + " s3= " + str(round(s3, 2))
             + " cspeed= " + str(round(curr_s, 2)))
-        # if self.tick_counter > 200:
-        #     print(text + " s1= " + str(round(s1, 2)) + " s2= " + str(round(s2, 2)) + " s3= " + str(round(s3, 2))
-        #         + " cspeed= " + str(round(curr_s, 2)))
 
     # debug print
     def dprint(self, text):
-        if self.tick_counter < 0:
-        # if self.tick_counter > 300 and self.tick_counter < 1500:
-            print(text)
         if PIDFastController.display_debug:
             PIDFastController.debug_strings.append(text)
 
@@ -528,97 +391,6 @@ class PIDFastController(Controller):
     def sdprint(text):
         if PIDFastController.display_debug:
             PIDFastController.debug_strings.append(text)
-
-    # original
-    def run_in_series_old(self, next_waypoint: Transform, close_waypoint: Transform, far_waypoint: Transform, **kwargs) -> VehicleControl:
-
-        # run lat pid controller
-        steering, error, wide_error, sharp_error = self.lat_pid_controller.run_in_series(next_waypoint=next_waypoint, close_waypoint=close_waypoint, far_waypoint=far_waypoint)
-        
-        
-        current_speed = Vehicle.get_speed(self.agent.vehicle)
-        
-        # get errors from lat pid
-        error = abs(round(error, 3))
-        wide_error = abs(round(wide_error, 3))
-        sharp_error = abs(round(sharp_error, 3))
-        #print(error, wide_error, sharp_error)
-
-        # calculate change in pitch
-        pitch = float(next_waypoint.record().split(",")[4])
-
-        if self.region == 1:
-            if sharp_error < 0.68 or current_speed <= 90:
-                throttle = 1
-                brake = 0
-            else:
-                throttle = -1
-                brake = 1
-        elif self.region == 2:
-            waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
-            dist = self.agent.vehicle.transform.location.distance(waypoint.location)
-            if dist <= 5:
-                self.brake_counter = 1
-                # print(self.waypoint_queue_braking[0])
-                self.waypoint_queue_braking.pop(0)
-            if self.brake_counter > 0:
-                throttle = -1
-                brake = 1
-                self.brake_counter += 1
-                if self.brake_counter >= 4:
-                    self.brake_counter = 0
-            elif sharp_error >= 0.67 and current_speed > 70:
-                throttle = 0
-                brake = 0.4
-            elif wide_error > 0.09 and current_speed > 92: # wide turn
-                throttle = max(0, 1 - 6*pow(wide_error + current_speed*0.003, 6))
-                brake = 0
-            else:
-                throttle = 1
-                brake = 0
-        
-        gear = max(1, (int)((current_speed - 2*pitch) / 60))
-        if throttle == -1:
-            gear = -1
-        
-        waypoint = self.waypoint_queue_region[0]
-        dist = self.agent.vehicle.transform.location.distance(waypoint.location)
-        if dist <= 10:
-            self.region += 1
-            self.waypoint_queue_region.pop(0)
-        
-        # if keyboard.is_pressed("space"):
-        #      print(self.agent.vehicle.transform.record())
-        
-        return VehicleControl(throttle=throttle, steering=steering, brake=brake, gear=gear)
-
-    def _brake_test(self, original_throttle, original_brake):
-        throttle, brake = original_throttle, original_brake
-        
-        current_speed = Vehicle.get_speed(self.agent.vehicle)
-        if self.brake_test_in_progress is False:
-            if current_speed > 500:  # when to start the test
-                self.brake_test_in_progress = True
-                self.brake_test_counter = 1
-                self.brake_start = self.agent.vehicle.transform
-                throttle, brake = -1, 1
-                print("-------")
-        else:
-            if self.brake_test_counter < 4:  # how many time ticks to use brake
-                throttle, brake = -1, 1
-            if self.brake_test_counter >= 25:  # for how many time tick to print output
-                self.brake_test_in_progress = False
-            self.brake_test_counter += 1
-        
-        if self.brake_test_in_progress is True:
-        # if self.brake_test_in_progress is True and (self.brake_test_counter) % 5 == 1:
-            break_dist = self.brake_start.location.distance(self.agent.vehicle.transform.location)
-            x = self.agent.vehicle.transform.location.x
-            #print("Brake test: " + str(self.brake_test_counter - 1) + " x= " + str(x) + " thr= " + str(throttle)
-            #     + " s= " + str(round(current_speed, 1)) + " d= " + str(round(break_dist, 1)))
-            print(str(self.brake_test_counter) + ',' + str(current_speed))
-
-        return throttle, brake
 
     # brake test. print time, speed, distance after hitting brakes at some initial speed. 
     # def run_in_series_brake_test(self, 
