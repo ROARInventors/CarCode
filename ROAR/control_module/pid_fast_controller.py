@@ -97,12 +97,12 @@ class PIDFastController(Controller):
         
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         # limit amount of steering change allowed at high speed. TODO: this could be a function of speed.
-        if current_speed > 240:
-            max_steering_change = 0.00038
-            new_steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
-            if new_steering != steering:
-                print(" CLIPPED: " + str(steering) + " to " + str(new_steering))
-            steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
+        # if current_speed > 240:
+        #     max_steering_change = 0.00038
+        #     new_steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
+        #     if new_steering != steering:
+        #         print(" CLIPPED: " + str(steering) + " to " + str(new_steering))
+        #     steering = np.clip(steering, self.previous_steering - max_steering_change, self.previous_steering + max_steering_change)
         
         # get errors from lat pid
         error = abs(round(error, 3))
@@ -115,13 +115,13 @@ class PIDFastController(Controller):
 
         self.tick_counter += 1
         if self.region == 1:
-            throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
-            # if sharp_error < 0.68 or current_speed <= 90:
-            #     throttle = 1
-            #     brake = 0
-            # else:
-            #     throttle = -1
-            #     brake = 1
+            # throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
+            if sharp_error < 0.68 or current_speed <= 90:
+                throttle = 1
+                brake = 0
+            else:
+                throttle = -1
+                brake = 1
         elif self.region == 2:
             waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
             dist = self.agent.vehicle.transform.location.distance(waypoint.location)
@@ -197,12 +197,12 @@ class PIDFastController(Controller):
             return 3
         if waypoint_x == 4203:
             return 1
-        if waypoint_x == 5012:  # ok with 1?  need to test
+        if waypoint_x == 5012:  # probably needs 3
             return 3
         if waypoint_x == 5008:
-            return 0
+            return 0 # todo: set to 0
         if waypoint_x == 5004:
-            return 0
+            return 0 # todo: set to 0
         return 3
 
     def _get_throttle_and_brake(self, more_waypoints: [Transform], wide_error):
@@ -212,7 +212,7 @@ class PIDFastController(Controller):
         r1 = self._get_radius(wp[self.close_index : self.close_index + 3])
         r2 = self._get_radius(wp[self.mid_index : self.mid_index + 3])
         r3 = self._get_radius(wp[self.far_index : self.far_index + 3])
-        # r4 = self._get_radius(wp[self.far_index + 1 : self.far_index + 4])
+        r4 = self._get_radius([wp[0], wp[2], wp[4]])
 
         # pitch_to_next_point = \
         #     math.asin( (wp[2].location.y - wp[0].location.y) / wp[0].location.distance(wp[2].location))
@@ -235,6 +235,7 @@ class PIDFastController(Controller):
         target_speed1 = self._get_target_speed(r1, pitch_to_next_point)
         target_speed2 = self._get_target_speed(r2, pitch_to_next_point)
         target_speed3 = self._get_target_speed(r3, pitch_to_next_point)
+        target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
 
         close_distance = self.target_distance[self.close_index] + 3
         mid_distance = self.target_distance[self.mid_index]
@@ -243,6 +244,8 @@ class PIDFastController(Controller):
         speed_data.append(self._speed_for_turn(close_distance, target_speed1, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(mid_distance, target_speed2, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(far_distance, target_speed3, pitch_to_next_point))
+        if current_speed > 220:
+            speed_data.append(self._speed_for_turn(close_distance, target_speed4, pitch_to_next_point))
 
         # update = speed_data[0]
         update = self._select_speed(speed_data)

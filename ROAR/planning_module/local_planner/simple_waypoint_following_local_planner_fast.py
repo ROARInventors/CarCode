@@ -165,8 +165,8 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         waypoint_lookahead = round(pow(current_speed, 2)*0.002 + 0.7*current_speed)
         far_waypoint = self.way_points_queue[waypoint_lookahead]
         close_waypoint = self.way_points_queue[min(120, waypoint_lookahead)]
-        more_waypoints = self.get_smoother_waypoints()
-        # more_waypoints = list(itertools.islice(self.way_points_queue, 0, 1000))
+        #more_waypoints = self.get_smoother_waypoints()
+        more_waypoints = list(itertools.islice(self.way_points_queue, 0, 1000))
         # self.print_distances(target_waypoint, close_waypoint, far_waypoint)
         # more_waypoints = list(itertools.islice(self.way_points_queue, 0, waypoint_lookahead+1))
         # print("\n\nART: waypoint_lookahead= " + str(waypoint_lookahead) + " wayp= " + str(len(self.way_points_queue)))
@@ -212,22 +212,22 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         # new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
         return new_points
 
-    def get_smoother_waypoints_all(self):
-        new_points = [self.way_points_queue[0]]
-        for i in range(len(self.way_points_queue) - 2):
-            p1 = self.way_points_queue[i]
-            p2 = self.way_points_queue[i+1]
-            new_p = Transform.from_array([
-                mean([p1.location.x, p2.location.x]),
-                mean([p1.location.y, p2.location.y]),
-                mean([p1.location.z, p2.location.z]),
-                mean([p1.rotation.pitch, p2.rotation.pitch]),
-                mean([p1.rotation.yaw, p2.rotation.yaw]),
-                mean([p1.rotation.roll, p2.rotation.roll]),
-            ])
-            new_points.append(new_p)
-        new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
-        return new_points
+    # def get_smoother_waypoints_all(self):
+    #     new_points = [self.way_points_queue[0]]
+    #     for i in range(len(self.way_points_queue) - 2):
+    #         p1 = self.way_points_queue[i]
+    #         p2 = self.way_points_queue[i+1]
+    #         new_p = Transform.from_array([
+    #             mean([p1.location.x, p2.location.x]),
+    #             mean([p1.location.y, p2.location.y]),
+    #             mean([p1.location.z, p2.location.z]),
+    #             mean([p1.rotation.pitch, p2.rotation.pitch]),
+    #             mean([p1.rotation.yaw, p2.rotation.yaw]),
+    #             mean([p1.rotation.roll, p2.rotation.roll]),
+    #         ])
+    #         new_points.append(new_p)
+    #     new_points.append(self.way_points_queue[len(self.way_points_queue) - 1]) # append last point
+    #     return new_points
 
 
     def set_closeness_threhold(self, config: dict):
