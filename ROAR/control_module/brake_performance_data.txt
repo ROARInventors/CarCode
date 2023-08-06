@@ -154,6 +154,25 @@ Done!
 | AVG for 1 trials = 516.6000076979399 |      N/A       |      N/A       |
 +--------------------------------------+----------------+----------------+
 
+Finished section 0 total: 1099 section: 1099
+Finished section 1 total: 3197 section: 2098
+Finished section 2 total: 6146 section: 2949
+Finished section 3 total: 9345 section: 3199
+Finished section 4 total: 10209 section: 864
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          511.0500076152384           |       0        |       1        |
+| AVG for 1 trials = 511.0500076152384 |      N/A       |      N/A       |
+
+Finished section 0 total: 1098 section: 1098
+Finished section 1 total: 3201 section: 2103
+Finished section 2 total: 6161 section: 2960
+Finished section 3 total: 9406 section: 3245
+Finished section 4 total: 10274 section: 868
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          514.3000076636672           |       0        |       1        |
+| AVG for 1 trials = 514.3000076636672 |      N/A       |      N/A       |
 
 Use waypoints as they are (no midpoint modification), use current solution for Region1 (slower?)
 INFO - 2023-08-06 09:14:25,586 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1

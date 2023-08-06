@@ -28,7 +28,7 @@ class SpeedData:
 
 class PIDFastController(Controller):
     debug_strings = deque(maxlen=1000)
-    display_debug = True
+    display_debug = False
 
     def __init__(self, agent, steering_boundary: Tuple[float, float],
                  throttle_boundary: Tuple[float, float], **kwargs):
@@ -115,13 +115,13 @@ class PIDFastController(Controller):
 
         self.tick_counter += 1
         if self.region == 1:
-            # throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
-            if sharp_error < 0.68 or current_speed <= 90:
-                throttle = 1
-                brake = 0
-            else:
-                throttle = -1
-                brake = 1
+            throttle, brake = self._get_throttle_and_brake(more_waypoints, wide_error)
+            # if sharp_error < 0.68 or current_speed <= 90:
+            #     throttle = 1
+            #     brake = 0
+            # else:
+            #     throttle = -1
+            #     brake = 1
         elif self.region == 2:
             waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
             dist = self.agent.vehicle.transform.location.distance(waypoint.location)
@@ -499,8 +499,7 @@ class PIDFastController(Controller):
     def _get_target_speed(self, radius, pitch=0.0):
         if radius >= self.max_radius:
             return self.max_speed
-        mu = 1.0
-        # mu = 0.75  # try this
+        mu = 1.15
         target_speed = math.sqrt(mu*9.81*radius) * 3.6
         if abs(pitch) > math.radians(1.5):
             # TODO: fix me!
