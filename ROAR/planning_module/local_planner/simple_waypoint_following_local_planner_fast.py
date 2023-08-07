@@ -15,6 +15,7 @@ from ROAR.utilities_module.errors import (
 from ROAR.agent_module.agent import Agent
 import json
 from pathlib import Path
+from statistics import mean
 
 
 class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
@@ -41,11 +42,14 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                          behavior_planner=behavior_planner,
                          )
         self.logger = logging.getLogger("SimplePathFollowingLocalPlanner")
+        self.timing_section_index = [3000, 10000, 20000, 30000, 32000]
+        self.timing_section_waypoints = []
         self.set_mission_plan()
         self.logger.debug("Simple Path Following Local Planner Initiated")
         self.closeness_threshold = closeness_threshold
         self.closeness_threshold_config = json.load(Path(
             agent.agent_settings.simple_waypoint_local_planner_config_file_path).open(mode='r'))
+        self.previous_num_steps = 0
 
     def set_mission_plan(self) -> None:
         """
@@ -61,6 +65,13 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                 self.mission_planner.mission_plan
         ):  # this actually clears the mission plan!!
             self.way_points_queue.append(self.mission_planner.mission_plan.popleft())
+
+        # self.way_points_queue = self.get_smoother_waypoints()
+        
+        if len(self.timing_section_waypoints) == 0: 
+            for i in self.timing_section_index:
+                if i < len(self.way_points_queue):
+                    self.timing_section_waypoints.append(self.way_points_queue[i])
 
         # set waypoint queue to current spawn location
         # 1. find closest waypoint
@@ -83,6 +94,10 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         Returns:
             True if Done, False otherwise
         """
+        if len(self.way_points_queue) == 0:
+            elapsed_time_steps = self.agent.time_counter - self.previous_num_steps
+            print("\n\nFinished total: " + str(self.agent.time_counter) + " section: " + str(elapsed_time_steps))
+
         return len(self.way_points_queue) == 0
 
     def run_in_series(self) -> VehicleControl:
@@ -104,13 +119,17 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         ):
             return VehicleControl()
 
+        # if len(self.timing_section_waypoints) == 0: 
+        #     for i in self.timing_section_index:
+        #         self.timing_section_waypoints.append(self.way_points_queue[i])
+
         # get vehicle's location
         vehicle_transform: Union[Transform, None] = self.agent.vehicle.transform
         if vehicle_transform is None or type(vehicle_transform) != Transform:
             raise AgentException("I do not know where I am, I cannot proceed forward")
 
         # redefine closeness level based on speed
-        self.set_closeness_threhold(self.closeness_threshold_config)
+        self.set_closeness_threshold(self.closeness_threshold_config)
 
         # get current waypoint
         curr_closest_dist = float("inf")
@@ -127,11 +146,13 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
                 curr_closest_dist = curr_dist
             elif curr_dist < self.closeness_threshold:
                 # i have moved onto a waypoint, remove that waypoint from the queue
-                self.way_points_queue.popleft()
+                passed_waypoint = self.way_points_queue.popleft()
+                self.update_section_time(passed_waypoint)
             else:
                 break
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         target_waypoint = self.way_points_queue[0]
+
         # if keyboard.is_pressed("t"):
         #     print(target_waypoint.record())
         #     print(self.agent.vehicle.transform.location)
@@ -143,10 +164,8 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         waypoint_lookahead = round(pow(current_speed, 2)*0.002 + 0.7*current_speed)
         far_waypoint = self.way_points_queue[waypoint_lookahead]
         close_waypoint = self.way_points_queue[min(120, waypoint_lookahead)]
-        more_waypoints = list(itertools.islice(self.way_points_queue, 0, 800))
-        # more_waypoints = list(itertools.islice(self.way_points_queue, 0, waypoint_lookahead+1))
-        # print("\n\nART: waypoint_lookahead= " + str(waypoint_lookahead) + " wayp= " + str(len(self.way_points_queue)))
-        # self.logger.debug("\n\nART: waypoint_lookahead=", waypoint_lookahead)
+        more_waypoints = list(itertools.islice(self.way_points_queue, 0, 1000))
+        # self.print_distances(target_waypoint, close_waypoint, far_waypoint)
         
         control: VehicleControl = self.controller.run_in_series(
             next_waypoint=target_waypoint, close_waypoint=close_waypoint, far_waypoint=far_waypoint, more_waypoints=more_waypoints)
@@ -157,7 +176,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         #                   f"Control: {control} | Speed: {Vehicle.get_speed(self.agent.vehicle)}\n")
         return control
 
-    def set_closeness_threhold(self, config: dict):
+    def set_closeness_threshold(self, config: dict):
         curr_speed = Vehicle.get_speed(self.agent.vehicle)
         for speed_upper_bound, closeness_threshold in config.items():
             speed_upper_bound = float(speed_upper_bound)
@@ -167,3 +186,31 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
 
     def restart(self):
         self.set_mission_plan()
+
+    def update_section_time(self, passed_waypoint: Transform):
+        if passed_waypoint in self.timing_section_waypoints:
+            ind = self.timing_section_waypoints.index(passed_waypoint)
+            elapsed_time_steps = self.agent.time_counter - self.previous_num_steps
+            print("\n\nFinished section " + str(ind) + " total: " + str(self.agent.time_counter) + " section: " + str(elapsed_time_steps))
+            self.previous_num_steps = self.agent.time_counter
+
+    def get_distance(self, wp: [Transform]):
+        curr_dist = 0
+        for i in range(len(wp) - 1):
+            start = wp[i]
+            end = wp[i+1]
+            curr_dist += start.location.distance(end.location)
+        return curr_dist
+    
+    def print_distances(self, next_wp: Transform, close_wp: Transform, far_wp: Transform):
+        if self.agent.time_counter % 10 == 0:
+            curr_wp = self.agent.vehicle.transform
+            next_dist = curr_wp.location.distance(next_wp.location)
+            close_dist = curr_wp.location.distance(close_wp.location)
+            far_dist = curr_wp.location.distance(far_wp.location)
+            print("Dist " + str(round(next_dist, 2)) + " " + str(round(close_dist)) + " " + str(round(far_dist)))
+
+    def __del__(self):
+        # in case of crash print where.
+        if len(self.way_points_queue) > 0:
+            print("\nNext waypoint is: " + str(self.way_points_queue[0]))

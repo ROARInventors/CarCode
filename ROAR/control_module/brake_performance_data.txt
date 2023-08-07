@@ -1,0 +1,520 @@
+
+number of time-intervals fromm brake start, s= current_speed, d= distance from brake_start
+
+Break test: 0 s= 100.3 d= 0.0
+Break test: 5 s= 82.8 d= 6.5
+Break test: 10 s= 59.2 d= 11.4
+Break test: 15 s= 35.5 d= 14.7
+Break test: 20 s= 11.9 d= 16.3
+
+---------------------
+
+Break test: 0 s= 150.5 d= 0.0
+Break test: 5 s= 132.9 d= 10.0
+Break test: 10 s= 108.9 d= 18.3
+Break test: 15 s= 84.9 d= 25.0
+Break test: 20 s= 61.0 d= 30.1
+Break test: 25 s= 37.0 d= 33.4
+Break test: 30 s= 13.2 d= 35.2
+
+---------------------
+
+Break test: 0 s= 200.4 d= 0.0
+Break test: 5 s= 182.4 d= 13.4
+Break test: 10 s= 158.1 d= 25.2
+Break test: 15 s= 133.8 d= 35.3
+Break test: 20 s= 109.6 d= 43.7
+Break test: 25 s= 85.4 d= 50.5
+Break test: 30 s= 61.3 d= 55.5
+Break test: 35 s= 37.2 d= 58.9
+Break test: 40 s= 13.2 d= 60.6
+
+---------------------
+
+Break test: 0 s= 250.0 d= 0.0
+Break test: 5 s= 233.1 d= 16.9
+Break test: 10 s= 208.4 d= 32.2
+Break test: 15 s= 184.0 d= 45.8
+Break test: 20 s= 159.8 d= 57.7
+Break test: 25 s= 135.6 d= 67.9
+Break test: 30 s= 111.6 d= 76.5
+Break test: 35 s= 87.5 d= 83.4
+Break test: 40 s= 63.4 d= 88.6
+Break test: 45 s= 39.4 d= 92.1
+Break test: 50 s= 15.5 d= 94.0
+
+
+------- at 200 hit brakes for 4 ticks, 
+speed drops to 192, but after throttle is applied speed still drops to 154.8 
+and starts increasing only after tick 19.
+idea: need to release break sooner (anticipating that speed will drop further)
+
+Brake test: 0 x= 2131.482177734375 thr= -1 s= 200.3 d= 0.0
+Brake test: 1 x= 2128.730224609375 thr= -1 s= 200.8 d= 2.8
+Brake test: 2 x= 2126.00146484375 thr= -1 s= 197.0 d= 5.5
+Brake test: 3 x= 2123.339599609375 thr= -1 s= 192.1 d= 8.2
+Brake test: 4 x= 2120.743896484375 thr= 1 s= 187.3 d= 10.9
+Brake test: 5 x= 2118.214111328125 thr= 1 s= 182.5 d= 13.4
+Brake test: 6 x= 2115.75 thr= 1 s= 177.6 d= 15.9
+Brake test: 7 x= 2113.353271484375 thr= 1 s= 172.8 d= 18.4
+Brake test: 8 x= 2111.017333984375 thr= 1 s= 168.9 d= 20.7
+Brake test: 9 x= 2108.724609375 thr= 1 s= 166.1 d= 23.0
+Brake test: 10 x= 2106.46630859375 thr= 1 s= 163.7 d= 25.3
+Brake test: 11 x= 2104.239990234375 thr= 1 s= 161.4 d= 27.6
+Brake test: 12 x= 2102.042236328125 thr= 1 s= 159.5 d= 29.8
+Brake test: 13 x= 2099.86767578125 thr= 1 s= 157.9 d= 32.0
+Brake test: 14 x= 2097.711669921875 thr= 1 s= 156.8 d= 34.2
+Brake test: 15 x= 2095.569091796875 thr= 1 s= 155.9 d= 36.4
+Brake test: 16 x= 2093.436279296875 thr= 1 s= 155.3 d= 38.5
+Brake test: 17 x= 2091.309326171875 thr= 1 s= 155.0 d= 40.7
+Brake test: 18 x= 2089.185791015625 thr= 1 s= 154.8 d= 42.8
+Brake test: 19 x= 2087.06298828125 thr= 1 s= 154.8 d= 45.0    <===
+Brake test: 20 x= 2084.939697265625 thr= 1 s= 154.9 d= 47.1
+Brake test: 21 x= 2082.814208984375 thr= 1 s= 155.1 d= 49.3
+Brake test: 22 x= 2080.685302734375 thr= 1 s= 155.4 d= 51.4
+Brake test: 23 x= 2078.55224609375 thr= 1 s= 155.7 d= 53.6
+Brake test: 24 x= 2076.41455078125 thr= 1 s= 156.1 d= 55.8
+Brake test: 25 x= 2074.271240234375 thr= 1 s= 156.5 d= 57.9
+Brake test: 26 x= 2072.1220703125 thr= 1 s= 156.9 d= 60.1
+Brake test: 27 x= 2069.966552734375 thr= 1 s= 157.4 d= 62.3
+Brake test: 28 x= 2067.804443359375 thr= 1 s= 157.9 d= 64.5
+Brake test: 29 x= 2065.635986328125 thr= 1 s= 158.4 d= 66.7
+Brake test: 30 x= 2063.460205078125 thr= 1 s= 158.9 d= 68.9
+Brake test: 31 x= 2061.277587890625 thr= 1 s= 159.4 d= 71.1
+Brake test: 32 x= 2059.087646484375 thr= 1 s= 159.9 d= 73.3
+Brake test: 33 x= 2056.890869140625 thr= 1 s= 160.4 d= 75.5
+Brake test: 34 x= 2054.686767578125 thr= 1 s= 160.9 d= 77.8
+Brake test: 35 x= 2052.474853515625 thr= 1 s= 161.5 d= 80.0
+Brake test: 36 x= 2050.256103515625 thr= 1 s= 162.0 d= 82.3
+Brake test: 37 x= 2048.02978515625 thr= 1 s= 162.5 d= 84.5
+Brake test: 38 x= 2045.7962646484375 thr= 1 s= 163.0 d= 86.8
+Brake test: 39 x= 2043.5552978515625 thr= 1 s= 163.6 d= 89.0
+Brake test: 40 x= 2041.306884765625 thr= 1 s= 164.1 d= 91.3
+Brake test: 41 x= 2039.0511474609375 thr= 1 s= 164.7 d= 93.6
+Brake test: 42 x= 2036.7880859375 thr= 1 s= 165.2 d= 95.9
+Brake test: 43 x= 2034.517578125 thr= 1 s= 165.7 d= 98.2
+Brake test: 44 x= 2032.2396240234375 thr= 1 s= 166.2 d= 100.5
+Brake test: 45 x= 2029.9544677734375 thr= 1 s= 166.8 d= 102.8
+Brake test: 46 x= 2027.662109375 thr= 1 s= 167.3 d= 105.1
+Brake test: 47 x= 2025.3623046875 thr= 1 s= 167.8 d= 107.5
+Brake test: 48 x= 2023.0550537109375 thr= 1 s= 168.4 d= 109.8
+Brake test: 49 x= 2020.7408447265625 thr= 1 s= 168.9 d= 112.1
+---------------------
+
+spawn points on the MAP
+-MAP 0Transform(Location(x=2542.800049, y=4069.599854, z=111.500000), Rotation(pitch=0.000000, yaw=169.999756, roll=0.000000))
+-MAP 1Transform(Location(x=1350.799927, y=4260.100098, z=62.000000), Rotation(pitch=-1.538753, yaw=169.996048, roll=0.271400))
+-MAP 2Transform(Location(x=1328.299927, y=3553.099854, z=68.900002), Rotation(pitch=0.000000, yaw=0.000000, roll=0.000000))
+-MAP 3Transform(Location(x=2421.800049, y=3741.599854, z=115.500000), Rotation(pitch=0.000000, yaw=-47.812477, roll=0.000000))
+
+end of section1: MAP 4Transform(Location(x=3592.799805, y=3660.099854, z=192.800003), Rotation(pitch=0.000000, yaw=-67.500038, roll=0.000000))
+good: MAP 5Transform(Location(x=3043.300049, y=2867.099854, z=345.500000), Rotation(pitch=0.000000, yaw=-157.499939, roll=0.000000))
+good: MAP 6Transform(Location(x=3527.799805, y=2609.099854, z=417.299988), Rotation(pitch=0.000000, yaw=-19.687559, roll=0.000000))
+good: MAP 7Transform(Location(x=4836.299805, y=2955.599854, z=505.099976), Rotation(pitch=0.000000, yaw=0.000130, roll=0.000000))
+good: MAP 8Transform(Location(x=5272.299805, y=3083.599854, z=500.299988), Rotation(pitch=0.000000, yaw=61.875092, roll=0.000000))
+before hair-pin: MAP 9Transform(Location(x=5614.799805, y=4085.599854, z=422.799988), Rotation(pitch=0.000000, yaw=45.000019, roll=0.000000))
+after hills: MAP 10Transform(Location(x=3695.799805, y=4926.100098, z=145.899994), Rotation(pitch=0.000000, yaw=154.687546, roll=0.000000))
+ending-flat: MAP 11Transform(Location(x=3090.300049, y=4852.600098, z=116.199997), Rotation(pitch=0.000000, yaw=-174.374893, roll=0.000000))
+round-about: MAP 12Transform(Location(x=2596.300049, y=4359.100098, z=103.599998), Rotation(pitch=0.000000, yaw=-101.250046, roll=0.000000))
+
+
+
+
+{
+    "70": 12,
+    "90": 13,
+    "110": 14,
+    "130": 18,
+    "160": 22,
+    "180": 32,
+    "200": 42,
+    "300": 52
+  }
+
+
+Brake counter for Breakpoints:
+3: 4441.98095703125,499.49835205078125,2797.848388671875,0.12575273215770721,3.083857536315918,-114.27618026733398
+2: 5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906
+
+new point
+4933.95751953125 3949.564208984375
+
+
+===================== CURRENT SOLUTION ================
+INFO - 2023-08-01 14:48:37,078 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1083 section: 1083
+Finished section 1 total: 3217 section: 2134
+Finished section 2 total: 6177 section: 2960
+Finished section 3 total: 9484 section: 3307
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          516.6000076979399           |       0        |       1        |
+| AVG for 1 trials = 516.6000076979399 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+Finished section 0 total: 1099 section: 1099
+Finished section 1 total: 3197 section: 2098
+Finished section 2 total: 6146 section: 2949
+Finished section 3 total: 9345 section: 3199
+Finished section 4 total: 10209 section: 864
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          511.0500076152384           |       0        |       1        |
+| AVG for 1 trials = 511.0500076152384 |      N/A       |      N/A       |
+
+Finished section 0 total: 1098 section: 1098
+Finished section 1 total: 3201 section: 2103
+Finished section 2 total: 6161 section: 2960
+Finished section 3 total: 9406 section: 3245
+Finished section 4 total: 10274 section: 868
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          514.3000076636672           |       0        |       1        |
+| AVG for 1 trials = 514.3000076636672 |      N/A       |      N/A       |
+
+Use waypoints as they are (no midpoint modification), use current solution for Region1 (slower?)
+INFO - 2023-08-06 09:14:25,586 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1101 section: 1101
+Finished section 1 total: 3225 section: 2124
+Finished section 2 total: 6239 section: 3014
+Finished section 3 total: 9520 section: 3281
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          520.8000077605247           |       0        |       1        |
+| AVG for 1 trials = 520.8000077605247 |      N/A       |      N/A       |
+
+
+INFO - 2023-08-06 08:58:18,688 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1098 section: 1098
+Finished section 1 total: 3226 section: 2128
+Finished section 2 total: 6253 section: 3027
+Finished section 3 total: 9554 section: 3301
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          521.7500077746809           |       0        |       1        |
+| AVG for 1 trials = 521.7500077746809 |      N/A       |      N/A       |
+
+
+INFO - 2023-08-05 23:52:48,350 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1094 section: 1094
+Finished section 1 total: 3231 section: 2137
+Finished section 2 total: 6239 section: 3008
+Finished section 3 total: 9540 section: 3301
+|         time_elapsed (sec)         | num_collisions | laps completed |
++------------------------------------+----------------+----------------+
+|          521.05000776425           |       0        |       1        |
+| AVG for 1 trials = 521.05000776425 |      N/A       |      N/A       |
+
+
+INFO - 2023-08-05 21:55:34,726 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1093 section: 1093
+Finished section 1 total: 3222 section: 2129
+Finished section 2 total: 6242 section: 3020
+Finished section 3 total: 9548 section: 3306
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          521.7500077746809           |       0        |       1        |
+| AVG for 1 trials = 521.7500077746809 |      N/A       |      N/A       |
+
+
+INFO - 2023-08-04 17:43:34,427 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1093 section: 1093
+Finished section 1 total: 3209 section: 2116
+Finished section 2 total: 6188 section: 2979
+crash :(
+
+===================== Aug1, with special decelaration formula to account for drag.
+and only 1 special braking waypoint 5012.
+
+Finished section 0 steps: 1146
+Finished section 1 steps: 2327
+Finished section 2 steps: 3252
+Finished section 3 steps: 3568
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          559.2000083327293           |       0        |       1        |
+| AVG for 1 trials = 559.2000083327293 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+
+===================== Aug1, deceleration with drag, + coasting + dt=0.05.
+and only 1 special braking waypoint 5012.
+INFO - 2023-08-01 21:36:24,177 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+
+Finished section 0 total: 1136 section: 1136
+Finished section 1 total: 3418 section: 2282
+Finished section 2 total: 6584 section: 3166
+Finished section 3 total: 10096 section: 3512
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          549.8000081926584           |       0        |       1        |
+| AVG for 1 trials = 549.8000081926584 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+
+===================== Aug1, use speed update with Big+, Small+, Maintain, Small-, Big-.  also dt=0.05.
+need to tune.
+INFO - 2023-08-02 16:01:55,769 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1105 section: 1105
+Finished section 1 total: 3317 section: 2212
+Finished section 2 total: 6407 section: 3090
+Finished section 3 total: 9814 section: 3407
+Finished section 4 total: 10692 section: 878
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          535.2500079758465           |       0        |       1        |
+| AVG for 1 trials = 535.2500079758465 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+From 250:
+
+1 brake period
+
+1,250.48908761877078
+2,250.9882901111593
+3,247.08753066582096
+4,241.3983804413085
+5,239.110806830944
+6,237.52744661909688
+7,235.8175843282178
+8,234.40923121620142
+9,233.32935449350725
+10,232.57752727268158
+11,231.91950847355236
+12,231.5121455793576
+13,231.29266955105948
+14,231.1955383630488
+15,231.1966712632506
+16,231.27858002680296
+17,231.42326481095378
+18,231.61671696186667
+19,231.85206191689232
+20,232.11754247734098
+21,232.4110305644356
+22,232.72373115486025
+23,233.05336682013072
+24,233.39564378457985
+25,233.74710740014018
+
+2 periods
+
+1,250.2780234973274
+2,250.84129151380853
+3,247.01113159782466
+4,241.13724442190005
+5,236.73030070998428
+6,233.39840661564685
+7,230.7720111074062
+8,228.25015267882134
+9,225.95561425628998
+10,224.30140050132286
+11,222.947069050921
+12,221.723184423093
+13,220.92527585697553
+14,220.34098335325058
+15,219.95761033307764
+16,219.73849291895255
+17,219.65516372482213
+18,219.67543021624533
+19,219.7805102077385
+20,219.94955296380692
+21,220.1690487020268
+22,220.43097199610233
+23,220.72325582094368
+24,221.04174529046247
+25,221.37933766883276
+
+3 periods
+
+1,250.27791063920955
+2,250.84123933054065
+3,247.01239788014183
+4,241.13789042821398
+5,236.73117563107218
+6,233.1000918111571
+7,228.50743109081222
+8,224.5671249983977
+9,221.56531518319082
+10,219.4350692920832
+11,217.6769240053116
+12,216.0361837794346
+13,214.85161578321853
+14,213.93402055271562
+15,213.27959573533983
+16,212.84433829031974
+17,212.5933774362129
+18,212.48582926658102
+19,212.49465547647296
+20,212.5949900101613
+21,212.7632951392698
+22,212.98882741491323
+23,213.25616202649948
+24,213.55710767646096
+25,213.88506440915273
+
+4 periods
+
+1,250.27848402352723
+2,250.8416518702988
+3,247.00698037684728
+4,241.13612853658597
+5,236.73086931952363
+6,233.10122049747307
+7,228.50608506736802
+8,222.80546228723162
+9,218.1443638005609
+10,215.52589103422423
+11,213.31649325428234
+12,211.1641775660151
+13,209.59462628336348
+14,208.31365409099655
+15,207.34549028267816
+16,206.65496127684273
+17,206.2030567817502
+18,205.94116948125452
+19,205.8307860072426
+20,205.8439660097293
+21,205.94779677792434
+22,206.12616297510957
+23,206.36179705961686
+24,206.63942991999056
+25,206.95250853836012
+
+From 150:
+
+1 period
+
+1,150.10150313604979
+2,150.68816649033522
+3,146.92300679003688
+4,142.40509330969556
+5,141.23639352460734
+6,140.54391456983137
+7,140.12366263431986
+8,139.92519816509346
+9,139.90446050443146
+10,140.02333854903173
+11,140.24915238620866
+12,140.5566290726846
+13,140.92742915370644
+14,141.3476340645088
+15,141.80613076119147
+16,142.2937164953038
+17,142.8044869643488
+18,143.33364156534216
+19,143.8767870400806
+20,144.43019304219501
+21,144.9920191500814
+22,145.56063323147333
+23,146.1338551207915
+24,146.71012081065803
+25,147.2893025866105
+
+2 periods
+
+1,150.5815120105251
+2,151.17238684869886
+3,147.40493962491598
+4,142.58184079570714
+5,137.76789580739975
+6,134.40929909320693
+7,133.14983950666328
+8,132.27421348091755
+9,131.71771898712828
+10,131.4216256103409
+11,131.33383067660594
+12,131.40991672768914
+13,131.61092309636766
+14,131.9066040253903
+15,132.27461412712054
+16,132.69819849538115
+17,133.16468266497094
+18,133.66436818926184
+19,134.18947881418316
+20,134.73361259318366
+21,135.29377696557984
+22,135.86615632979593
+23,136.44760988700273
+24,137.03604979683345
+25,137.62971335636945
+
+3 periods
+
+1,150.5861984898349
+2,151.1770797422649
+3,147.41043676391232
+4,142.58551328445557
+5,137.7714440822197
+6,132.9624853237112
+7,128.15371015559728
+8,125.73952209801493
+9,124.20566032939067
+10,123.11384240413585
+11,122.39733515161507
+12,121.98801413520997
+13,121.82392565510663
+14,121.85204689211102
+15,122.02659247335964
+16,122.3105854634425
+17,122.67705069743562
+18,123.10604576458556
+19,123.58272904225423
+20,124.09596502916605
+21,124.63716082437817
+22,125.19945314505256
+23,125.77694560951703
+24,126.36782877016176
+25,126.96866136009378
+
+4 periods
+
+1,150.5815120105251
+2,151.17238684869886
+3,147.40493962491598
+4,142.58184079570714
+5,137.76789580739975
+6,132.9588303096116
+7,128.1511740055948
+8,123.34540111280008
+9,120.35077002941716
+10,118.73977610320514
+11,117.5961666663985
+12,116.84911687201279
+13,116.42559471851823
+14,116.25893426774277
+15,116.29228205959906
+16,116.47674109594485
+17,116.77333792354393
+18,117.15386237076439
+19,117.59762309606741
+20,118.08927657864938
+21,118.61740501719709
+22,119.17310466814875
+23,119.74979059175922
+24,120.34103531529239
+25,120.94550103592081
+
+Finished section 1 total: 3270 section: 2165
+Finished section 2 total: 6290 section: 3020
+Finished section 3 total: 9717 section: 3427
+Finished section 4 total: 10612 section: 895
+Done!
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          531.2000079154968           |       0        |       1        |
+| AVG for 1 trials = 531.2000079154968 |      N/A       |      N/A       |
++--------------------------------------+----------------+----------------+
+
+Spawn info:
+# spawn_list = self.client.get_world().get_map().get_spawn_points()
+# for i, p in enumerate(spawn_list):
+#     print("\n\nMAP " + str(i) + str(p))
