@@ -28,7 +28,7 @@ class SpeedData:
 
 class PIDFastController(Controller):
     # save debug messages to show after crash or finish.
-    display_debug = False
+    display_debug = True
     debug_strings = deque(maxlen=1000)
 
     def __init__(self, agent, steering_boundary: Tuple[float, float],
@@ -177,7 +177,6 @@ class PIDFastController(Controller):
             math.asin( np.clip((wp[1].location.y - wp[0].location.y) / (self.target_distance[1] - self.target_distance[0]), -0.5, 0.5))
         p2 = \
             math.asin( np.clip((wp[2].location.y - wp[0].location.y) / (self.target_distance[2] - self.target_distance[0]), -0.5, 0.5))
-        # taking the steeper one, to avoid underestimating pitch on downhill.
         pitch_to_next_point = min(p1, p2)
 
         target_speed1 = self._get_target_speed(r1, pitch_to_next_point)
@@ -192,8 +191,7 @@ class PIDFastController(Controller):
         speed_data.append(self._speed_for_turn(mid_distance, target_speed2, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(far_distance, target_speed3, pitch_to_next_point))
         if current_speed > 220:
-            # at high speed look further ahead
-            r4 = self._get_radius([wp[self.close_index], wp[self.close_index+2], wp[self.close_index+4]])
+            r4 = self._get_radius([wp[0], wp[2], wp[4]])
             target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
             speed_data.append(self._speed_for_turn(close_distance, target_speed4, pitch_to_next_point))
 
@@ -278,7 +276,7 @@ class PIDFastController(Controller):
             # Consider speeding up
             if self._speed_dropping_fast(percent_change_per_tick):
                 # speed is dropping fast, ok to throttle because the effect of throttle is delayed
-                self.dprint("tb: tick" + str(self.tick_counter) + " throttle: full speed drop: sp_ch=" + str(percent_speed_change))
+                self.dprint("tb: tick" + str(self.tick_counter) + " throttle: full speed dropping: sp_ch=" + str(percent_speed_change))
                 return 1, 0
             if percent_of_max < speed_up_threshold:
                 self.dprint("tb: tick" + str(self.tick_counter) + " throttle full: p_max=" + str(percent_of_max))
@@ -297,9 +295,8 @@ class PIDFastController(Controller):
         percent_speed_change = (current_speed - self.previous_speed) / (self.previous_speed + 0.0001) # avoid division by zero
         return percent_speed_change < (-percent_change_per_tick / 2)
 
-    # find speed_data with smallest recommended speed (same as the largest speed excess [current > recommended])
-    # TODO: change to look for smallest recommended.
     def _select_speed(self, speed_data: [SpeedData]):
+        # return speed data with the largest speed excess (i.e. current > recommended)
         largest_diff = -300
         index_of_largest_diff = -1
         for i, sd in enumerate(speed_data):
@@ -349,17 +346,13 @@ class PIDFastController(Controller):
         start = self.agent.vehicle.transform
         points.append(start)
         curr_dist = 0
-        prev_dist = 0
         num_points = 0
         for p in more_waypoints:
             end = p
             num_points += 1
             curr_dist += start.location.distance(end.location)
             if curr_dist > self.intended_target_distance[len(points)]:
-            # this way was slower in first 2 sections.
-            # if curr_dist > prev_dist + (self.intended_target_distance[len(points)] - self.intended_target_distance[len(points)-1]):
                 self.target_distance[len(points)] = curr_dist
-                prev_dist = curr_dist
                 points.append(end)
                 dist.append(curr_dist)
             start = end
