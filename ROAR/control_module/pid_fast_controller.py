@@ -161,6 +161,8 @@ class PIDFastController(Controller):
             return 0 # todo: set to 0
         if waypoint_x == 5004:
             return 0 # todo: set to 0
+        if waypoint_x == 4915:
+            return 1
         return 3
 
     def _get_throttle_and_brake(self, more_waypoints: [Transform], wide_error):
@@ -373,7 +375,7 @@ class PIDFastController(Controller):
     def _get_target_speed(self, radius, pitch=0.0):
         if radius >= self.max_radius:
             return self.max_speed
-        mu = 1.155
+        mu = 1.17
         target_speed = math.sqrt(mu*9.81*radius) * 3.6
         return max(20, min(target_speed, self.max_speed))  # clamp between 20 and max_speed
 
