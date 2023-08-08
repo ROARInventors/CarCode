@@ -151,11 +151,19 @@ class PIDFastController(Controller):
 
     def _get_forced_brake_counter_for_waypoint(self, waypoint):
         waypoint_x = int(waypoint.location.x)
+        if  waypoint_x == 3017: # 
+            return 2
+        if  waypoint_x == 3607: # 
+            return 1
+        if  waypoint_x == 3695: # 
+            return 1
         if  waypoint_x == 4441: # needs 3
             return 3
-        if waypoint_x == 4203: # 1 is enough
-            return 1
-        if waypoint_x == 5012:  # probably needs 3
+        if waypoint_x == 5624:
+            return 5
+        if waypoint_x == 4203: # 1 is enough?, maybe 2 to be on the safe side
+            return 2
+        if waypoint_x == 5012:  # needs 3
             return 3
         if waypoint_x == 5008:
             return 0 # todo: set to 0

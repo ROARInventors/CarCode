@@ -23,11 +23,11 @@ ax = plt.axes(projection='3d')
 # ydata = np.cos(zdata) + 0.1 * np.random.randn(100)
 # 26530
 # 26946
-start = 26400 
+start = 22400 
 p1 = start + 3
 p2 = 26436
 p3 = 26456
-end = 26690
+end = 24690
 st_x = df['X'][start:p1]
 st_y = df['Y'][start:p1]
 st_z = df['Z'][start:p1]
