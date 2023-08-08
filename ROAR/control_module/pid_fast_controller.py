@@ -397,7 +397,7 @@ class PIDFastController(Controller):
     def _get_target_speed(self, radius, pitch=0.0):
         if radius >= self.max_radius:
             return self.max_speed
-        mu = 1.17
+        mu = 1.16
         target_speed = math.sqrt(mu*9.81*radius) * 3.6
         return max(20, min(target_speed, self.max_speed))  # clamp between 20 and max_speed
 
