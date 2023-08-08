@@ -24,7 +24,7 @@ def main(args):
         agent = PIDFastAgent(vehicle=my_vehicle,
                          agent_settings=agent_config)
         carla_runner.start_game_loop(agent=agent,
-                                     use_manual_control= False)
+                                     use_manual_control=not args.auto)
 
     except Exception as e:
         logging.error(f"Something bad happened during initialization: {e}")
