@@ -119,9 +119,9 @@ class PIDFastController(Controller):
         self.tick_counter += 1
         waypoint = self.waypoint_queue_braking[0] # 5012 is weird bump spot
         dist = self.agent.vehicle.transform.location.distance(waypoint.location)
-        break_for_counts = self._get_forced_brake_counter_for_waypoint(waypoint)
-        if dist <= 5 and break_for_counts > 0:
-            self.forced_brake_counter = break_for_counts - 1
+        brake_for_counts = self._get_forced_brake_counter_for_waypoint(waypoint)
+        if dist <= 5 and brake_for_counts > 0:
+            self.forced_brake_counter = brake_for_counts - 1
             throttle = -1
             brake = 0.8
             print("\nspecial brake point: ")
@@ -373,22 +373,22 @@ class PIDFastController(Controller):
         # if distance to section_location < section_length: return _speed_for_turn(... target_speed ...)
         distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint1.location)
         if distance_to_speed_point < 15:
-            print("\nspecial slow down point1: ")
-            print(self.slow_down_waypoint1)
+            self.dprint("\nspecial slow down point1: ")
+            self.dprint(self.slow_down_waypoint1)
             target_speed = 43
             return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
         
         distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint2.location)
         if distance_to_speed_point < 15:
-            print("\nspecial slow down point2: ")
-            print(self.slow_down_waypoint2)
+            self.dprint("\nspecial slow down point2: ")
+            self.dprint(self.slow_down_waypoint2)
             target_speed = 27
             return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
 
         distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint3.location)
         if distance_to_speed_point < 15:
-            print("\nspecial slow down point2: ")
-            print(self.slow_down_waypoint2)
+            self.dprint("\nspecial slow down point3: ")
+            self.dprint(self.slow_down_waypoint2)
             target_speed = 135
             return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
 
