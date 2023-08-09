@@ -69,6 +69,19 @@ class PIDFastController(Controller):
                 waypoint = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
                 self.waypoint_queue_braking.append(waypoint)
 
+        # TODO: move these points to a list of {location, distance, target_speed}
+        point_str = "5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035" # p23080
+        raw = point_str.split(",")
+        self.slow_down_waypoint1 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
+
+        point_str = "5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906"
+        raw = point_str.split(",")
+        self.slow_down_waypoint2 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
+
+        point_str = "4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738"
+        raw = point_str.split(",")
+        self.slow_down_waypoint3 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
+
         self.lat_pid_controller = LatPIDController(
             agent=agent,
             config=self.config["latitudinal_controller"],
@@ -111,7 +124,7 @@ class PIDFastController(Controller):
             self.forced_brake_counter = break_for_counts - 1
             throttle = -1
             brake = 0.8
-            print("\nspecial break point: ")
+            print("\nspecial brake point: ")
             print(self.waypoint_queue_braking[0])
             self.waypoint_queue_braking.pop(0)
         elif self.forced_brake_counter > 0:
@@ -159,18 +172,22 @@ class PIDFastController(Controller):
             return 1
         if  waypoint_x == 4441: # needs 3
             return 3
+        if waypoint_x == 5629:
+            # return 2
+            return 0
         if waypoint_x == 5624:
-            return 5
+            # return 3
+            return 0
         if waypoint_x == 4203: # 1 is enough?, maybe 2 to be on the safe side
             return 2
         if waypoint_x == 5012:  # needs 3
-            return 3
+            return 0
         if waypoint_x == 5008:
             return 0 # todo: set to 0
         if waypoint_x == 5004:
             return 0 # todo: set to 0
         if waypoint_x == 4915:
-            return 1
+            return 0
         return 3
 
     def _get_throttle_and_brake(self, more_waypoints: [Transform], wide_error):
@@ -204,6 +221,9 @@ class PIDFastController(Controller):
             r4 = self._get_radius([wp[self.close_index], wp[self.close_index+2], wp[self.close_index+4]])
             target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
             speed_data.append(self._speed_for_turn(close_distance, target_speed4, pitch_to_next_point))
+        slow_down = self._speed_for_slow_down(pitch_to_next_point)
+        if slow_down is not None:
+            speed_data.append(slow_down)
 
         update = self._select_speed(speed_data)
 
@@ -259,7 +279,7 @@ class PIDFastController(Controller):
                 # if speed is not decreasing fast, hit the brake.
                 if self.brake_ticks <= 0 and not self._speed_dropping_fast(percent_change_per_tick):
                 # if self.brake_ticks <= 0 and percent_speed_change > (-percent_change_per_tick / 2):
-                    # start braking, and set for how many tick to brake
+                    # start braking, and set for how many ticks to brake
                     self.brake_ticks = math.floor((percent_of_max - 1) / percent_change_per_tick)
                     # TODO: try 
                     # self.brake_ticks = 1, or (1 or 2 but not more)
@@ -268,11 +288,13 @@ class PIDFastController(Controller):
                 else:
                     # speed is already dropping fast, ok to throttle because the effect of throttle is delayed
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: throttle early1: sp_ch=" + str(percent_speed_change))
+                    self.brake_ticks = 0 # done slowing down. clear brake_ticks
                     return 1, 0
             else:
                 if self._speed_dropping_fast(percent_change_per_tick):
                     # speed is already dropping fast, ok to throttle because the effect of throttle is delayed
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: throttle early2: sp_ch=" + str(percent_speed_change))
+                    self.brake_ticks = 0 # done slowing down. clear brake_ticks
                     return 1, 0
                 throttle_to_maintain = self._get_throttle_to_maintain_speed(speed_data.current_speed, pitch_to_next_point)
                 if percent_of_max > 1.02 or percent_speed_change > (-percent_change_per_tick / 2):
@@ -345,6 +367,33 @@ class PIDFastController(Controller):
             throttle *= 1.03
         return throttle
 
+    def _speed_for_slow_down(self, pitch_to_next_point):
+        # TODO: use a list of slow_down points [{section_location, section_length, target_speed}, ...] 
+        # to check if we are close to any of them.
+        # if distance to section_location < section_length: return _speed_for_turn(... target_speed ...)
+        distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint1.location)
+        if distance_to_speed_point < 15:
+            print("\nspecial slow down point1: ")
+            print(self.slow_down_waypoint1)
+            target_speed = 43
+            return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
+        
+        distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint2.location)
+        if distance_to_speed_point < 15:
+            print("\nspecial slow down point2: ")
+            print(self.slow_down_waypoint2)
+            target_speed = 27
+            return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
+
+        distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint3.location)
+        if distance_to_speed_point < 15:
+            print("\nspecial slow down point2: ")
+            print(self.slow_down_waypoint2)
+            target_speed = 135
+            return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
+
+        return None
+
     def _speed_for_turn(self, distance, target_speed, pitch_to_next_point):
         current_speed = Vehicle.get_speed(self.agent.vehicle)
         d = (1/675) * (target_speed**2) + distance
@@ -352,6 +401,8 @@ class PIDFastController(Controller):
         return SpeedData(distance, current_speed, target_speed, max_speed)
 
     def _get_next_interesting_waypoints(self, more_waypoints: [Transform], current_speed):
+        # return a list of points with distances approximately as given 
+        # in intended_target_distance[] from the current location.
         points = []
         dist = [] # for debugging
         start = self.agent.vehicle.transform
