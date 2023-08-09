@@ -217,7 +217,7 @@ class PIDFastController(Controller):
         speed_data.append(self._speed_for_turn(mid_distance, target_speed2, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(far_distance, target_speed3, pitch_to_next_point))
         if current_speed > 220:
-            # at high speed look further ahead
+            # at high speed use larger spacing between points to look further ahead and detect wide turns.
             r4 = self._get_radius([wp[self.close_index], wp[self.close_index+2], wp[self.close_index+4]])
             target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
             speed_data.append(self._speed_for_turn(close_distance, target_speed4, pitch_to_next_point))
@@ -408,7 +408,6 @@ class PIDFastController(Controller):
         start = self.agent.vehicle.transform
         points.append(start)
         curr_dist = 0
-        prev_dist = 0
         num_points = 0
         for p in more_waypoints:
             end = p
@@ -418,7 +417,6 @@ class PIDFastController(Controller):
             # this way was slower in first 2 sections.
             # if curr_dist > prev_dist + (self.intended_target_distance[len(points)] - self.intended_target_distance[len(points)-1]):
                 self.target_distance[len(points)] = curr_dist
-                prev_dist = curr_dist
                 points.append(end)
                 dist.append(curr_dist)
             start = end
