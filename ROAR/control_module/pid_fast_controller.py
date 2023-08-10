@@ -44,8 +44,8 @@ class PIDFastController(Controller):
         throttle_boundary = throttle_boundary
         self.steering_boundary = steering_boundary
         self.config = json.load(Path(agent.agent_settings.pid_config_file_path).open(mode='r'))
-        self.intended_target_distance = [0, 30, 60, 90, 120, 150] 
-        self.target_distance = [0, 30, 60, 90, 120, 150]
+        self.intended_target_distance = [0, 30, 60, 90, 120, 150, 180] 
+        self.target_distance = [0, 30, 60, 90, 120, 150, 180]
         self.close_index = 0
         self.mid_index = 1
         self.far_index = 2
@@ -90,22 +90,23 @@ class PIDFastController(Controller):
 
     def init_slow_points(self):
         slowList = []
-        point_str = "5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035" # p23080
-        raw = point_str.split(",")
-        slow_down_waypoint1 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
-        slowList.append(SlowDownPoint(slow_down_waypoint1, 43, 15))
+        p1 = self.string_to_transform("5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035")
+        slowList.append(SlowDownPoint(p1, 43, 15))
 
-        point_str = "5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906"
-        raw = point_str.split(",")
-        slow_down_waypoint2 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
-        slowList.append(SlowDownPoint(slow_down_waypoint2, 27, 15))
+        p2 = self.string_to_transform("5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906")
+        slowList.append(SlowDownPoint(p2, 27, 15))
 
-        point_str = "4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738"
-        raw = point_str.split(",")
-        slow_down_waypoint3 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
-        slowList.append(SlowDownPoint(slow_down_waypoint3, 135, 15))
+        p3 = self.string_to_transform("4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738")
+        slowList.append(SlowDownPoint(p3, 135, 8))
+
+        p4 = self.string_to_transform("4203.197754,491.6361694,2752.22998,-0.246795535,6.657794952,-106.3645782")
+        slowList.append(SlowDownPoint(p4, 130, 8))
     
         return slowList
+    
+    def string_to_transform(self, transform_string):
+        raw = transform_string.split(",")
+        return Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
 
     # modified
     def run_in_series(self, 
@@ -192,7 +193,7 @@ class PIDFastController(Controller):
             # return 3
             return 0
         if waypoint_x == 4203: # 1 is enough?, maybe 2 to be on the safe side
-            return 2
+            return 0
         if waypoint_x == 5012:  # needs 3
             return 0
         if waypoint_x == 5008:

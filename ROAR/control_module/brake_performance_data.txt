@@ -119,6 +119,8 @@ round-about: MAP 12Transform(Location(x=2596.300049, y=4359.100098, z=103.599998
 
 
 
+  "waypoint_file_path": "./ROAR/configurations/major_center_waypoints_1LAPONLY_righted.txt",
+
 
 {
     "70": 12,

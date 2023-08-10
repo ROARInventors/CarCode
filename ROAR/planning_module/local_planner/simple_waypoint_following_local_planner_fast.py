@@ -6,6 +6,7 @@ from ROAR.planning_module.mission_planner.mission_planner import MissionPlanner
 from ROAR.planning_module.behavior_planner.behavior_planner import BehaviorPlanner
 # import keyboard
 
+from functools import reduce
 import itertools
 import logging
 from typing import Union
@@ -151,7 +152,19 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
             else:
                 break
         current_speed = Vehicle.get_speed(self.agent.vehicle)
-        target_waypoint = self.way_points_queue[0]
+        # target_waypoint = self.way_points_queue[0]
+        target_waypoint = self.next_waypoint_smooth(current_speed)
+
+        # if current_speed > 200:
+        #     target_waypoint = self.next_waypoint_smooth(50)
+        # elif current_speed > 150:
+        #     target_waypoint = self.next_waypoint_smooth(30)
+        # elif current_speed > 90:
+        #     target_waypoint = self.next_waypoint_smooth(20)
+        # elif current_speed > 70:
+        #     target_waypoint = self.next_waypoint_smooth(10)
+        # elif current_speed > 80:
+        #     target_waypoint = self.next_waypoint_smooth(20)
 
         # if keyboard.is_pressed("t"):
         #     print(target_waypoint.record())
@@ -186,6 +199,41 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
 
     def restart(self):
         self.set_mission_plan()
+
+    # This idea is from smooth_waypoint_following_local_planner.py
+    def next_waypoint_smooth(self, current_speed) -> (Transform):
+        # f503: 50, 30, 20, 10
+        if current_speed > 200:
+            target_waypoint = self.average_point(50)
+        elif current_speed > 150:
+            target_waypoint = self.average_point(30)
+        elif current_speed > 90:
+            target_waypoint = self.average_point(20)
+        elif current_speed > 70:
+            target_waypoint = self.average_point(10)
+        else:
+            target_waypoint = self.way_points_queue[0]
+        return target_waypoint
+
+    def average_point(self, num_points):
+        smooth_lookahead = min(num_points, len(self.way_points_queue) - 1)
+
+        sample_points = range(0, num_points)
+        if smooth_lookahead > 100:  # Reduce computation by only looking at every 10 steps ahead
+            sample_points = range(0, num_points, num_points // 10)
+        if num_points > 5:
+            location_sum = reduce(lambda x, y: x + y,
+                                  (self.way_points_queue[i].location for i in sample_points))
+            rotation_sum = reduce(lambda x, y: x + y,
+                                  (self.way_points_queue[i].rotation for i in sample_points))
+
+            num_points = len(sample_points)
+            target_waypoint = Transform(location=location_sum / num_points, rotation=rotation_sum / num_points)
+        else:
+            target_waypoint = self.way_points_queue[0]
+
+        return target_waypoint
+
 
     def update_section_time(self, passed_waypoint: Transform):
         if passed_waypoint in self.timing_section_waypoints:
