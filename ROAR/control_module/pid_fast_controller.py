@@ -19,12 +19,17 @@ from ROAR.planning_module.mission_planner.waypoint_following_mission_planner imp
 
 class SpeedData:
     def __init__(self, distance_to_section, current_speed, target_speed, recommended_speed):
-        super().__init__()
         self.current_speed = current_speed
         self.distance_to_section = distance_to_section
         self.target_speed_at_distance = target_speed
         self.recommended_speed_now = recommended_speed
         self.speed_diff = current_speed - recommended_speed
+
+class SlowDownPoint:
+    def __init__(self, transform, targetSpeed, distance):
+        self.transform = transform
+        self.targetSpeed = targetSpeed
+        self.distance = distance
 
 class PIDFastController(Controller):
     # save debug messages to show after crash or finish.
@@ -69,19 +74,8 @@ class PIDFastController(Controller):
                 waypoint = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
                 self.waypoint_queue_braking.append(waypoint)
 
-        # TODO: move these points to a list of {location, distance, target_speed}
-        point_str = "5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035" # p23080
-        raw = point_str.split(",")
-        self.slow_down_waypoint1 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
-
-        point_str = "5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906"
-        raw = point_str.split(",")
-        self.slow_down_waypoint2 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
-
-        point_str = "4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738"
-        raw = point_str.split(",")
-        self.slow_down_waypoint3 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
-
+        self.slowList = self.init_slow_points()
+        
         self.lat_pid_controller = LatPIDController(
             agent=agent,
             config=self.config["latitudinal_controller"],
@@ -93,6 +87,25 @@ class PIDFastController(Controller):
     def __del__(self):
         for s in self.__class__.debug_strings:
             print(s)
+
+    def init_slow_points(self):
+        slowList = []
+        point_str = "5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035" # p23080
+        raw = point_str.split(",")
+        slow_down_waypoint1 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
+        slowList.append(SlowDownPoint(slow_down_waypoint1, 43, 15))
+
+        point_str = "5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906"
+        raw = point_str.split(",")
+        slow_down_waypoint2 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
+        slowList.append(SlowDownPoint(slow_down_waypoint2, 27, 15))
+
+        point_str = "4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738"
+        raw = point_str.split(",")
+        slow_down_waypoint3 = Transform(location=Location(x=raw[0], y=raw[1], z=raw[2]), rotation=Rotation(pitch=0, yaw=0, roll=0))
+        slowList.append(SlowDownPoint(slow_down_waypoint3, 135, 15))
+    
+        return slowList
 
     # modified
     def run_in_series(self, 
@@ -216,11 +229,13 @@ class PIDFastController(Controller):
         speed_data.append(self._speed_for_turn(close_distance, target_speed1, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(mid_distance, target_speed2, pitch_to_next_point))
         speed_data.append(self._speed_for_turn(far_distance, target_speed3, pitch_to_next_point))
+
         if current_speed > 220:
             # at high speed use larger spacing between points to look further ahead and detect wide turns.
             r4 = self._get_radius([wp[self.close_index], wp[self.close_index+2], wp[self.close_index+4]])
             target_speed4 = self._get_target_speed(r4, pitch_to_next_point)
             speed_data.append(self._speed_for_turn(close_distance, target_speed4, pitch_to_next_point))
+
         slow_down = self._speed_for_slow_down(pitch_to_next_point)
         if slow_down is not None:
             speed_data.append(slow_down)
@@ -367,31 +382,14 @@ class PIDFastController(Controller):
             throttle *= 1.03
         return throttle
 
-    def _speed_for_slow_down(self, pitch_to_next_point):
-        # TODO: use a list of slow_down points [{section_location, section_length, target_speed}, ...] 
-        # to check if we are close to any of them.
-        # if distance to section_location < section_length: return _speed_for_turn(... target_speed ...)
-        distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint1.location)
-        if distance_to_speed_point < 15:
-            self.dprint("\nspecial slow down point1: ")
-            self.dprint(self.slow_down_waypoint1)
-            target_speed = 43
-            return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
+    def _speed_for_slow_down(self, pitch_to_next_point):        
+        for slowPoint in self.slowList:
+            distance_to_speed_point = self.agent.vehicle.transform.location.distance(slowPoint.transform.location)
+            if distance_to_speed_point < slowPoint.distance:
+                self.dprint("\nspecial slow down point: ")
+                self.dprint(slowPoint.transform)
+                return self._speed_for_turn(2 + distance_to_speed_point/5, slowPoint.targetSpeed, pitch_to_next_point)
         
-        distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint2.location)
-        if distance_to_speed_point < 15:
-            self.dprint("\nspecial slow down point2: ")
-            self.dprint(self.slow_down_waypoint2)
-            target_speed = 27
-            return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
-
-        distance_to_speed_point = self.agent.vehicle.transform.location.distance(self.slow_down_waypoint3.location)
-        if distance_to_speed_point < 15:
-            self.dprint("\nspecial slow down point3: ")
-            self.dprint(self.slow_down_waypoint2)
-            target_speed = 135
-            return self._speed_for_turn(2 + distance_to_speed_point/5, target_speed, pitch_to_next_point)
-
         return None
 
     def _speed_for_turn(self, distance, target_speed, pitch_to_next_point):

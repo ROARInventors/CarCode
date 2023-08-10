@@ -131,6 +131,18 @@ round-about: MAP 12Transform(Location(x=2596.300049, y=4359.100098, z=103.599998
     "300": 52
   }
 
+new idea, crashed at last 90degree turn before round-about
+      "80": {
+            "Kp": 0.68,
+            "Kd": 0.08,
+            "Ki": 0.08
+      },
+      "90": {
+            "Kp": 0.65,
+            "Kd": 0.09,
+            "Ki": 0.09
+      },
+
 
 Brake counter for Breakpoints:
 3: 4441.98095703125,499.49835205078125,2797.848388671875,0.12575273215770721,3.083857536315918,-114.27618026733398
