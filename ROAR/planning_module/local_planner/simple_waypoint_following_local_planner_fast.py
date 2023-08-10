@@ -120,10 +120,6 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         ):
             return VehicleControl()
 
-        # if len(self.timing_section_waypoints) == 0: 
-        #     for i in self.timing_section_index:
-        #         self.timing_section_waypoints.append(self.way_points_queue[i])
-
         # get vehicle's location
         vehicle_transform: Union[Transform, None] = self.agent.vehicle.transform
         if vehicle_transform is None or type(vehicle_transform) != Transform:
@@ -203,14 +199,21 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
     # This idea is from smooth_waypoint_following_local_planner.py
     def next_waypoint_smooth(self, current_speed) -> (Transform):
         # f503: 50, 30, 20, 10
-        if current_speed > 200:
-            target_waypoint = self.average_point(50)
-        elif current_speed > 150:
-            target_waypoint = self.average_point(30)
-        elif current_speed > 90:
-            target_waypoint = self.average_point(20)
-        elif current_speed > 70:
-            target_waypoint = self.average_point(10)
+        # if current_speed > 200:
+        #     target_waypoint = self.average_point(50)
+        # elif current_speed > 150:
+        #     target_waypoint = self.average_point(30)
+        # elif current_speed > 90:
+        #     target_waypoint = self.average_point(20)
+        # elif current_speed > 70:
+        #     target_waypoint = self.average_point(10)
+        # else:
+        #     target_waypoint = self.way_points_queue[0]
+        # return target_waypoint
+    # self.closeness_threshold
+        # target_waypoint = self.way_points_queue[0]
+        if current_speed > 70:
+            target_waypoint = self.average_point(self.closeness_threshold)
         else:
             target_waypoint = self.way_points_queue[0]
         return target_waypoint
