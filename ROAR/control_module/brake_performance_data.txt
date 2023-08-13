@@ -169,6 +169,33 @@ Done!
 +--------------------------------------+----------------+----------------+
 
 
+No smoothing in region1, then use point averaging, + mu=1.18
+INFO - 2023-08-10 16:28:56,034 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1092 section: 1092
+Finished section 1 total: 3160 section: 2068
+Finished section 2 total: 6042 section: 2882
+Finished section 3 total: 9211 section: 3169
+Finished section 4 total: 10037 section: 826
+|           time_elapsed (sec)          | num_collisions | laps completed |
++---------------------------------------+----------------+----------------+
+|           502.45000748708844          |       0        |       1        |
+| AVG for 1 trials = 502.45000748708844 |      N/A       |      N/A       |
+
+
+No smoothing in region1, then use point averaging.
+INFO - 2023-08-10 16:18:40,008 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1090 section: 1090
+Finished section 1 total: 3164 section: 2074
+Finished section 2 total: 6054 section: 2890
+Finished section 3 total: 9228 section: 3174
+Finished section 4 total: 10066 section: 838
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          503.9000075086951           |       0        |       1        |
+| AVG for 1 trials = 503.9000075086951 |      N/A       |      N/A       |
+
+
+
 Aug10. fast and get_smoother_waypoints
 +--------------------------------------+----------------+----------------+
 |          time_elapsed (sec)          | num_collisions | laps completed |
