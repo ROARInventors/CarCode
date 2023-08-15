@@ -90,6 +90,9 @@ class PIDFastController(Controller):
 
     def init_slow_points(self):
         slowList = []
+        p0 = self.string_to_transform("3017.900146484375,152.14938354492188,3765.33740234375,0.13231982290744781,3.9114372730255127,-64.34010887145996")
+        slowList.append(SlowDownPoint(p0, 130, 15))
+
         p1 = self.string_to_transform("5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035")
         slowList.append(SlowDownPoint(p1, 43, 15))
 
@@ -100,8 +103,16 @@ class PIDFastController(Controller):
         slowList.append(SlowDownPoint(p3, 135, 8))
 
         p4 = self.string_to_transform("4203.197754,491.6361694,2752.22998,-0.246795535,6.657794952,-106.3645782")
-        slowList.append(SlowDownPoint(p4, 130, 8))
+        slowList.append(SlowDownPoint(p4, 100, 15))
     
+        # p5 = self.string_to_transform("4409.135742,497.1532593,2780.800537,0.013071255,2.529184818,-118.5602665")
+        # p5 = self.string_to_transform("4372.069824,495.2227173,2760.460938,-0.017578291,5.301203251,-119.2707748")
+        p5 = self.string_to_transform("4432.474609,498.8491821,2793.180176,0.044999924,3.816627502,-116.8201389")
+        slowList.append(SlowDownPoint(p5, 90, 15))
+
+        p6 = self.string_to_transform("3151.341797,159.2339935,3716.354492,-0.321014404,5.717428207,-78.48518085")
+        slowList.append(SlowDownPoint(p6, 130, 10))
+
         return slowList
     
     def string_to_transform(self, transform_string):
@@ -178,31 +189,13 @@ class PIDFastController(Controller):
 
     def _get_forced_brake_counter_for_waypoint(self, waypoint):
         waypoint_x = int(waypoint.location.x)
-        if  waypoint_x == 3017: # 
-            return 2
-        if  waypoint_x == 3607: # 
-            return 1
-        if  waypoint_x == 3695: # 
-            return 1
-        if  waypoint_x == 4441: # needs 3
-            return 3
-        if waypoint_x == 5629:
-            # return 2
-            return 0
-        if waypoint_x == 5624:
-            # return 3
-            return 0
-        if waypoint_x == 4203: # 1 is enough?, maybe 2 to be on the safe side
-            return 0
-        if waypoint_x == 5012:  # needs 3
-            return 0
-        if waypoint_x == 5008:
-            return 0 # todo: set to 0
-        if waypoint_x == 5004:
-            return 0 # todo: set to 0
-        if waypoint_x == 4915:
-            return 0
-        return 3
+        # if  waypoint_x == 3607: # 
+        #     return 1
+        # if  waypoint_x == 3695: # 
+        #     return 1
+        # if  waypoint_x == 4441: # needs 3
+        #     return 3
+        return 0
 
     def _get_throttle_and_brake(self, more_waypoints: [Transform], wide_error):
         current_speed = Vehicle.get_speed(self.agent.vehicle)
@@ -288,7 +281,7 @@ class PIDFastController(Controller):
 
         if percent_of_max > 1:
             # Consider slowing down
-            if percent_of_max > 1 + percent_change_per_tick:
+            if percent_of_max > 1 + (2 * percent_change_per_tick):
                 if self.brake_ticks > 0:
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: counter" + str(self.brake_ticks))
                     return -1, 1
@@ -387,8 +380,8 @@ class PIDFastController(Controller):
         for slowPoint in self.slowList:
             distance_to_speed_point = self.agent.vehicle.transform.location.distance(slowPoint.transform.location)
             if distance_to_speed_point < slowPoint.distance:
-                self.dprint("\nspecial slow down point: ")
-                self.dprint(slowPoint.transform)
+                print("\nspecial slow down point: ")
+                print(slowPoint.transform)
                 return self._speed_for_turn(2 + distance_to_speed_point/5, slowPoint.targetSpeed, pitch_to_next_point)
         
         return None

@@ -169,6 +169,33 @@ Done!
 +--------------------------------------+----------------+----------------+
 
 
+Aug 15. more aggressive late braking 2.5*
+Finished section 3 total: 9057 section: 3103
+Finished section 4 total: 9865 section: 808
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          493.8000073581934           |       0        |       1        |
+| AVG for 1 trials = 493.8000073581934 |      N/A       |      N/A       |
+
+
+
+Aug 14. no brake-points, only slow-down points.
+Finished section 3 total: 9109 section: 3128
+Finished section 4 total: 9925 section: 816
+|           time_elapsed (sec)          | num_collisions | laps completed |
++---------------------------------------+----------------+----------------+
+|           496.85000740364194          |       0        |       1        |
+
+
+More aggressive with later brake, minor change to steering at high speed. extra slow-down points. almost no brake-points.
+INFO - 2023-08-14 22:46:40,250 - ROAR_Sim.carla_client.util.keyboard_control - No joystick detected. Plz use your keyboard instead
+|           time_elapsed (sec)          | num_collisions | laps completed |
++---------------------------------------+----------------+----------------+
+|          0.15000000223517418          |       0        |       1        |
+|           498.8000074326992           |       0        |       1        |
+|           496.95000740513206          |       0        |       1        |
+| AVG for 3 trials = 331.96667161335546 |      N/A       |      N/A       |
+
 No smoothing in region1, then use point averaging, + mu=1.18
 INFO - 2023-08-10 16:28:56,034 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
 Finished section 0 total: 1092 section: 1092

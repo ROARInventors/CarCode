@@ -212,7 +212,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         # return target_waypoint
     # self.closeness_threshold
         # target_waypoint = self.way_points_queue[0]
-        if current_speed > 70:
+        if current_speed > 70 and current_speed < 220 and self.agent.time_counter > 700:
             target_waypoint = self.average_point(self.closeness_threshold)
         else:
             target_waypoint = self.way_points_queue[0]
