@@ -90,28 +90,26 @@ class PIDFastController(Controller):
 
     def init_slow_points(self):
         slowList = []
-        p0 = self.string_to_transform("3017.900146484375,152.14938354492188,3765.33740234375,0.13231982290744781,3.9114372730255127,-64.34010887145996")
-        slowList.append(SlowDownPoint(p0, 130, 15))
+        p1 = self.string_to_transform("3017.900146484375,152.14938354492188,3765.33740234375,0.13231982290744781,3.9114372730255127,-64.34010887145996")
+        slowList.append(SlowDownPoint(p1, 130, 20))
 
-        p1 = self.string_to_transform("5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035")
-        slowList.append(SlowDownPoint(p1, 43, 15))
+        p2 = self.string_to_transform("3151.341797,159.2339935,3716.354492,-0.321014404,5.717428207,-78.48518085")
+        slowList.append(SlowDownPoint(p2, 130, 10))
 
-        p2 = self.string_to_transform("5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906")
-        slowList.append(SlowDownPoint(p2, 27, 15))
+        p3 = self.string_to_transform("4203.197754,491.6361694,2752.22998,-0.246795535,6.657794952,-106.3645782")
+        slowList.append(SlowDownPoint(p3, 100, 15))
 
-        p3 = self.string_to_transform("4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738")
-        slowList.append(SlowDownPoint(p3, 135, 8))
+        p4 = self.string_to_transform("4432.474609,498.8491821,2793.180176,0.044999924,3.816627502,-116.8201389")
+        slowList.append(SlowDownPoint(p4, 90, 15))
 
-        p4 = self.string_to_transform("4203.197754,491.6361694,2752.22998,-0.246795535,6.657794952,-106.3645782")
-        slowList.append(SlowDownPoint(p4, 100, 15))
-    
-        # p5 = self.string_to_transform("4409.135742,497.1532593,2780.800537,0.013071255,2.529184818,-118.5602665")
-        # p5 = self.string_to_transform("4372.069824,495.2227173,2760.460938,-0.017578291,5.301203251,-119.2707748")
-        p5 = self.string_to_transform("4432.474609,498.8491821,2793.180176,0.044999924,3.816627502,-116.8201389")
-        slowList.append(SlowDownPoint(p5, 90, 15))
+        p5 = self.string_to_transform("5613.11377,400.4781494,4202.975586,-0.189971924,-5.463495255,86.37561035")
+        slowList.append(SlowDownPoint(p5, 43, 15))
 
-        p6 = self.string_to_transform("3151.341797,159.2339935,3716.354492,-0.321014404,5.717428207,-78.48518085")
-        slowList.append(SlowDownPoint(p6, 130, 10))
+        p6 = self.string_to_transform("5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906")
+        slowList.append(SlowDownPoint(p6, 27, 15))
+
+        p7 = self.string_to_transform("4915.248047,301.824585,3980.433105,-0.070221022,-8.900111198,144.3268738")
+        slowList.append(SlowDownPoint(p7, 135, 8))
 
         return slowList
     
