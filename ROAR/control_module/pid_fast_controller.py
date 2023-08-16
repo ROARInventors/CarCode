@@ -114,6 +114,7 @@ class PIDFastController(Controller):
         throttle, brake = self._get_throttle_and_brake(more_waypoints)
         #throttle, brake = self._brake_test(throttle, brake)
 
+        current_speed = Vehicle.get_speed(self.agent.vehicle)
         # calculate change in pitch
         pitch = float(next_waypoint.record().split(",")[4])
         gear = max(1, (int)((current_speed - 2*pitch) / 60))
@@ -128,7 +129,6 @@ class PIDFastController(Controller):
                     + "     loc x,z" + str(self.agent.vehicle.transform.location.x)
                     + " " + str(self.agent.vehicle.transform.location.z)) 
 
-        current_speed = Vehicle.get_speed(self.agent.vehicle)
         self.previous_speed = current_speed
         if self.brake_ticks > 0 and brake > 0:
             self.brake_ticks -= 1
