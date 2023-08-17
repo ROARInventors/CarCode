@@ -219,7 +219,10 @@ class PIDFastController(Controller):
 
         if percent_of_max > 1:
             # Consider slowing down
-            if percent_of_max > 1 + (3.0 * percent_change_per_tick):
+            brake_threshold_multiplier = 3.0
+            if speed_data.current_speed > 200:
+                brake_threshold_multiplier = 2.0
+            if percent_of_max > 1 + (brake_threshold_multiplier * percent_change_per_tick):
                 if self.brake_ticks > 0:
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: counter" + str(self.brake_ticks))
                     return -1, 1

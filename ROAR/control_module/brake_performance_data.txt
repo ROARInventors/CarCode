@@ -146,6 +146,35 @@ new idea, crashed at last 90degree turn before round-about
       },
 
 
+490s: touching the wall
+      "200": {
+            "Kp": 0.3,
+            "Kd": 0.05,
+            "Ki": 0.045
+      },
+      "230": {
+            "Kp": 0.33,
+            "Kd": 0.045,
+            "Ki": 0.055
+      },
+
+489s: worked with 3.0 + (2.0 over 200)
+      "200": {
+            "Kp": 0.4,
+            "Kd": 0.06,
+            "Ki": 0.06
+      },
+      "230": {
+            "Kp": 0.33,
+            "Kd": 0.05,
+            "Ki": 0.06
+      },
+      "300": {
+            "Kp": 0.15,
+            "Kd": 0.003,
+            "Ki": 0.005
+      }
+
 Brake counter for Breakpoints:
 3: 4441.98095703125,499.49835205078125,2797.848388671875,0.12575273215770721,3.083857536315918,-114.27618026733398
 2: 5012.12646484375,322.0113525390625,3822.21142578125,-0.6661374568939209,7.25579833984375,34.138038635253906
@@ -167,6 +196,21 @@ Done!
 |          516.6000076979399           |       0        |       1        |
 | AVG for 1 trials = 516.6000076979399 |      N/A       |      N/A       |
 +--------------------------------------+----------------+----------------+
+
+Less aggressive at speed 200+
+INFO - 2023-08-17 15:56:22,363 - ROAR_Sim.carla_client.carla_runner - initialized. going into lap 1
+Finished section 0 total: 1095 section: 1095
+Finished section 1 total: 3103 section: 2008
+Finished section 2 total: 5914 section: 2811
+Finished section 3 total: 8976 section: 3062
+Finished section 4 total: 9793 section: 817
++--------------------------------------+----------------+----------------+
+|          time_elapsed (sec)          | num_collisions | laps completed |
++--------------------------------------+----------------+----------------+
+|          490.2500073052943           |       0        |       1        |
+|          491.1500073187053           |       0        |       1        |
+|          490.30000730603933          |       0        |       1        |
+| AVG for 3 trials = 490.5666739766796 |      N/A       |      N/A       |
 
 
 Aug 15. more aggressive late braking 2.5*

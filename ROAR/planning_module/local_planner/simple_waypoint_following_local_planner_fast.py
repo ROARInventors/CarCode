@@ -199,7 +199,7 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
     # This idea is from smooth_waypoint_following_local_planner.py
     def next_waypoint_smooth(self, current_speed) -> (Transform):
         # f503: 50, 30, 20, 10
-        if current_speed > 70 and current_speed < 220 and self.agent.time_counter > 700:
+        if current_speed > 70 and current_speed < 200 and self.agent.time_counter > 700:
             target_waypoint = self.average_point(self.closeness_threshold)
         else:
             target_waypoint = self.way_points_queue[0]
