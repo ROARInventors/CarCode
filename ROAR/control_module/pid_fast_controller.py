@@ -197,20 +197,20 @@ class PIDFastController(Controller):
             debug_note += "-6"
             # print("changing multiples-5 " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)) 
             #       + " loc " + str(self.agent.vehicle.transform.location.x))
-        if pitch_to_next_point < math.radians(-8):
-            percent_change_per_tick = 0.03
-            speed_up_threshold = 0.85
-            throttle_decrease_multiple = 0.2
-            throttle_increase_multiple = 1
-            debug_note += "-8"
-            # print("changing multiples-6 " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)) 
-            #       + " loc " + str(self.agent.vehicle.transform.location.x))
-        if pitch_to_next_point < math.radians(-10):
-            percent_change_per_tick = 0.01
-            speed_up_threshold = 0.8
-            throttle_decrease_multiple = 0.2
-            throttle_increase_multiple = 1
-            debug_note += "-10"
+        # if pitch_to_next_point < math.radians(-8):
+        #     percent_change_per_tick = 0.03
+        #     speed_up_threshold = 0.85
+        #     throttle_decrease_multiple = 0.2
+        #     throttle_increase_multiple = 1
+        #     debug_note += "-8"
+        #     # print("changing multiples-6 " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)) 
+        #     #       + " loc " + str(self.agent.vehicle.transform.location.x))
+        # if pitch_to_next_point < math.radians(-10):
+        #     percent_change_per_tick = 0.01
+        #     speed_up_threshold = 0.8
+        #     throttle_decrease_multiple = 0.2
+        #     throttle_increase_multiple = 1
+        #     debug_note += "-10"
         if debug_note != "":
             self.dprint("changing multiples- " + str(debug_note) + " " + str(pitch_to_next_point) + " deg " + str(math.degrees(pitch_to_next_point)) 
                     + " loc " + str(self.agent.vehicle.transform.location.x))
@@ -219,13 +219,12 @@ class PIDFastController(Controller):
 
         if percent_of_max > 1:
             # Consider slowing down
-            if percent_of_max > 1 + (2 * percent_change_per_tick):
+            if percent_of_max > 1 + (3.0 * percent_change_per_tick):
                 if self.brake_ticks > 0:
                     self.dprint("tb: tick" + str(self.tick_counter) + " brake: counter" + str(self.brake_ticks))
                     return -1, 1
                 # if speed is not decreasing fast, hit the brake.
                 if self.brake_ticks <= 0 and not self._speed_dropping_fast(percent_change_per_tick):
-                # if self.brake_ticks <= 0 and percent_speed_change > (-percent_change_per_tick / 2):
                     # start braking, and set for how many ticks to brake
                     self.brake_ticks = math.floor((percent_of_max - 1) / percent_change_per_tick)
                     # TODO: try 
