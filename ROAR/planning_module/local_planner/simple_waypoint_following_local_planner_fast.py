@@ -151,17 +151,6 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
         # target_waypoint = self.way_points_queue[0]
         target_waypoint = self.next_waypoint_smooth(current_speed)
 
-        # if current_speed > 200:
-        #     target_waypoint = self.next_waypoint_smooth(50)
-        # elif current_speed > 150:
-        #     target_waypoint = self.next_waypoint_smooth(30)
-        # elif current_speed > 90:
-        #     target_waypoint = self.next_waypoint_smooth(20)
-        # elif current_speed > 70:
-        #     target_waypoint = self.next_waypoint_smooth(10)
-        # elif current_speed > 80:
-        #     target_waypoint = self.next_waypoint_smooth(20)
-
         # if keyboard.is_pressed("t"):
         #     print(target_waypoint.record())
         #     print(self.agent.vehicle.transform.location)
@@ -196,16 +185,15 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
     def restart(self):
         self.set_mission_plan()
 
-    # This idea is from smooth_waypoint_following_local_planner.py
-    def next_waypoint_smooth(self, current_speed) -> (Transform):
-        # f503: 50, 30, 20, 10
+    # The idea and code for averaging points is from smooth_waypoint_following_local_planner.py
+    def next_waypoint_smooth(self, current_speed: float) -> (Transform):
         if current_speed > 70 and current_speed < 200 and self.agent.time_counter > 700:
             target_waypoint = self.average_point(self.closeness_threshold)
         else:
             target_waypoint = self.way_points_queue[0]
         return target_waypoint
 
-    def average_point(self, num_points):
+    def average_point(self, num_points: int):
         smooth_lookahead = min(num_points, len(self.way_points_queue) - 1)
 
         sample_points = range(0, num_points)
@@ -224,12 +212,11 @@ class SimpleWaypointFollowingLocalPlanner(LocalPlanner):
 
         return target_waypoint
 
-
     def update_section_time(self, passed_waypoint: Transform):
         if passed_waypoint in self.timing_section_waypoints:
             ind = self.timing_section_waypoints.index(passed_waypoint)
             elapsed_time_steps = self.agent.time_counter - self.previous_num_steps
-            print("\n\nFinished section " + str(ind) + " total: " + str(self.agent.time_counter) + " section: " + str(elapsed_time_steps))
+            # print("\n\nFinished section " + str(ind) + " total: " + str(self.agent.time_counter) + " section: " + str(elapsed_time_steps))
             self.previous_num_steps = self.agent.time_counter
 
     def get_distance(self, wp: [Transform]):
